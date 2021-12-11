@@ -16,7 +16,7 @@ std::error_code run_prompt();
 int main(int argc, char *argv[]) {
   std::error_code err;
   if (argc > 2) {
-    fmt::print("Usage: cxx_loxi [file]\n");
+    fmt::print("Usage: {} [file]\n", argv[0]);
     return EX_USAGE;
   } else if (argc == 2) {
     err = run_file(argv[1]);
