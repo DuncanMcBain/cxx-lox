@@ -1,23 +1,24 @@
+#include "Error.h"
+#include "Scanner.h"
+
 #include <absl/strings/string_view.h>
 
 #include <fmt/core.h>
 
 #include <mio/mmap.hpp>
 
+// TODO: replace this?
 #include <iostream>
 #include <string>
-#include <string_view>
 
 #include <sysexits.h>
-
-#include "Error.h"
-#include "Scanner.h"
 
 std::error_code run(std::string &&);
 std::error_code run_file(absl::string_view, lox::Location &);
 std::error_code run_prompt(lox::Location &);
 
 int main(int argc, char *argv[]) {
+  // TODO: change to absl StatusOr?
   std::error_code err;
   lox::Location loc;
   if (argc > 2) {

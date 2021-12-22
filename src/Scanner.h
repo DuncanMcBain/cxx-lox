@@ -1,6 +1,7 @@
 #ifndef LOX_SCANNER_H_
 #define LOX_SCANNER_H_
 
+#include "KeywordNames.h"
 #include "Token.h"
 
 #include <absl/strings/string_view.h>
@@ -11,9 +12,9 @@
 namespace lox {
 
 class Scanner {
-  absl::string_view source_;
+  const absl::string_view source_;
   std::vector<Token> tokens_;
-  std::unordered_map<std::string, TokenType> identifiers_;
+  const std::unordered_map<absl::string_view, TokenType> &keywords_;
   size_t start_   = 0;
   size_t current_ = 0;
   int line_       = 1;
@@ -24,17 +25,18 @@ class Scanner {
   void consume_number();
   void consume_string();
   bool match(char);
-  char peek();
-  char peek(size_t count);
+  char peek() const;
+  char peek(size_t count) const;
   void scan_token();
-  absl::string_view slice_token();
+  absl::string_view slice_token() const;
 
-  bool at_end() { return current_ >= source_.length(); }
+  bool at_end() const { return current_ >= source_.length(); }
 
  public:
   Scanner(absl::string_view src)
       : source_(src)
-      , tokens_{} {}
+      , tokens_{}
+      , keywords_(get_keywords()) {}
 
   std::vector<Token> &tokenise();
 };

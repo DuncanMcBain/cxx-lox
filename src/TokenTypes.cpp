@@ -3,7 +3,7 @@
 #include "TokenTypes.h"
 
 namespace {
-#define X(name) #name,
+#define X(NAME, _) #NAME,
 
 static std::vector<std::string> names = {
 #include "TokenTypes.inc"

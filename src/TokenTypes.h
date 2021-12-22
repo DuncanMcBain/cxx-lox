@@ -8,7 +8,7 @@
 
 namespace lox {
 
-#define X(name) name,
+#define X(name, _) name,
 
 enum class TokenType : int {
 #include "TokenTypes.inc"

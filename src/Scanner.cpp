@@ -13,16 +13,13 @@ void Scanner::add_token(TokenType type) {
 char Scanner::advance() { return source_.at(current_++); }
 
 void Scanner::consume_identifier() {
-  while (absl::ascii_isalnum(peek()) || peek() == '_') {
-    advance();
-  }
+  while (absl::ascii_isalnum(peek()) || peek() == '_') { advance(); }
 
   auto ident = slice_token();
-  auto type = TokenType::IDENT;
-  // TODO: map identifiers to token types
-  //if (map.find(ident) != map.end()) {
-  //  type = map[ident];
-  //}
+  auto type  = TokenType::IDENT;
+  if (keywords_.find(ident) != keywords_.end()) {
+    type = keywords_.at(ident);
+  }
   add_token(type);
 }
 
@@ -31,10 +28,11 @@ void Scanner::consume_number() {
 
   // TODO: consider supporting 2.f style numbers
   if (peek() == '.' && absl::ascii_isdigit(peek(1))) {
-    advance();
-    while (absl::ascii_isdigit(peek())) { advance(); }
-    add_token(TokenType::NUMBER);
+    do {
+      advance();
+    } while (absl::ascii_isdigit(peek()));
   }
+  add_token(TokenType::NUMBER);
 }
 
 void Scanner::consume_string() {
@@ -60,9 +58,9 @@ bool Scanner::match(char expected) {
   return true;
 }
 
-char Scanner::peek() { return at_end() ? '\0' : source_.at(current_); }
+char Scanner::peek() const { return at_end() ? '\0' : source_.at(current_); }
 
-char Scanner::peek(size_t count) {
+char Scanner::peek(size_t count) const {
   ABSL_ASSERT(count > 0);
   if (current_ + count >= source_.length()) { return '\0'; }
   return source_.at(current_ + count);
@@ -112,7 +110,7 @@ void Scanner::scan_token() {
   }
 }
 
-absl::string_view Scanner::slice_token() {
+absl::string_view Scanner::slice_token() const {
   auto b = source_.begin();
   return {b + start_, b + current_};
 }
