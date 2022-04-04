@@ -3,32 +3,41 @@
 
 #include "Token.h"
 
+#include <memory>
 #include <string>
 
 namespace lox {
 
 struct Visitor;
+
 struct Expr {
-  virtual void accept(Visitor &);
+  virtual void accept(Visitor &) = 0;
+  virtual ~Expr()                = default;
 };
+
 struct Binary;
 struct Grouping;
+struct BoolLiteral;
 struct StrLiteral;
+struct NullLiteral;
 struct NumLiteral;
 struct Unary;
+
 struct Visitor {
-  void visitBinaryExpr(Binary &);
-  void visitGroupingExpr(Grouping &);
-  void visitStrLiteralExpr(StrLiteral &);
-  void visitNumLiteralExpr(NumLiteral &);
-  void visitUnaryExpr(Unary &);
+  virtual void visitBinaryExpr(Binary &);
+  virtual void visitGroupingExpr(Grouping &);
+  virtual void visitBoolLiteralExpr(BoolLiteral &);
+  virtual void visitStrLiteralExpr(StrLiteral &);
+  virtual void visitNullLiteralExpr(NullLiteral &);
+  virtual void visitNumLiteralExpr(NumLiteral &);
+  virtual void visitUnaryExpr(Unary &);
 };
 
 struct Binary : Expr {
-  Expr &left_;
-  Expr &right_;
+  std::shared_ptr<Expr> left_;
+  std::shared_ptr<Expr> right_;
   Token op_;
-  Binary(Expr &left, Expr &right, Token op)
+  Binary(std::shared_ptr<Expr> left, std::shared_ptr<Expr> right, Token op)
       : left_(left)
       , right_(right)
       , op_(op) {}
@@ -36,10 +45,17 @@ struct Binary : Expr {
 };
 
 struct Grouping : Expr {
-  Expr &expr_;
-  Grouping(Expr &expr)
+  std::shared_ptr<Expr> expr_;
+  Grouping(std::shared_ptr<Expr> expr)
       : expr_(expr) {}
   void accept(Visitor &v) override { v.visitGroupingExpr(*this); }
+};
+
+struct BoolLiteral : Expr {
+  bool value_;
+  BoolLiteral(bool value)
+      : value_(value) {}
+  void accept(Visitor &v) override { v.visitBoolLiteralExpr(*this); }
 };
 
 struct StrLiteral : Expr {
@@ -47,6 +63,11 @@ struct StrLiteral : Expr {
   StrLiteral(std::string value)
       : value_(value) {}
   void accept(Visitor &v) override { v.visitStrLiteralExpr(*this); }
+};
+
+struct NullLiteral : Expr {
+  NullLiteral() {}
+  void accept(Visitor &v) override { v.visitNullLiteralExpr(*this); }
 };
 
 struct NumLiteral : Expr {
@@ -57,9 +78,9 @@ struct NumLiteral : Expr {
 };
 
 struct Unary : Expr {
-  Expr &right_;
+  std::shared_ptr<Expr> right_;
   Token op_;
-  Unary(Expr &right, Token op)
+  Unary(std::shared_ptr<Expr> right, Token op)
       : right_(right)
       , op_(op) {}
   void accept(Visitor &v) override { v.visitUnaryExpr(*this); }

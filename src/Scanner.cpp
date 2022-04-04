@@ -17,9 +17,7 @@ void Scanner::consume_identifier() {
 
   auto ident = slice_token();
   auto type  = TokenType::IDENT;
-  if (keywords_.find(ident) != keywords_.end()) {
-    type = keywords_.at(ident);
-  }
+  if (keywords_.find(ident) != keywords_.end()) { type = keywords_.at(ident); }
   add_token(type);
 }
 
@@ -28,9 +26,7 @@ void Scanner::consume_number() {
 
   // TODO: consider supporting 2.f style numbers
   if (peek() == '.' && absl::ascii_isdigit(peek(1))) {
-    do {
-      advance();
-    } while (absl::ascii_isdigit(peek()));
+    do { advance(); } while (absl::ascii_isdigit(peek()));
   }
   add_token(TokenType::NUMBER);
 }
@@ -60,10 +56,8 @@ bool Scanner::match(char expected) {
 
 char Scanner::peek() const { return at_end() ? '\0' : source_.at(current_); }
 
-char Scanner::peek(size_t count) const {
-  ABSL_ASSERT(count > 0);
-  if (current_ + count >= source_.length()) { return '\0'; }
-  return source_.at(current_ + count);
+char Scanner::peek(size_t c) const {
+  return current_ + c < source_.length() ? source_.at(current_ + c) : '\0';
 }
 
 void Scanner::scan_token() {
@@ -120,7 +114,7 @@ std::vector<Token> &Scanner::tokenise() {
     start_ = current_;
     scan_token();
   }
-  tokens_.emplace_back(TokenType::EOF, "", line_, source_.length());
+  tokens_.emplace_back(TokenType::EOF, "", line_, current_ + 1);
   return tokens_;
 }
 

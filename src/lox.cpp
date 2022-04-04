@@ -1,4 +1,5 @@
 #include "Error.h"
+#include "Parser.h"
 #include "Scanner.h"
 
 #include <absl/strings/string_view.h>
@@ -62,5 +63,7 @@ std::error_code run(std::string &&src) {
   lox::Scanner scan(src);
   auto tokens = scan.tokenise();
   for (auto t : tokens) { fmt::print("token: {}\n", std::string(t)); }
+  lox::Parser p(std::move(tokens));
+  p.parse();
   return std::error_code{};
 }

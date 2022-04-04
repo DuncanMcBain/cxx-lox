@@ -9,7 +9,7 @@
 
 namespace lox {
 
-const std::unordered_map<absl::string_view, TokenType> & get_keywords();
+const std::unordered_map<absl::string_view, TokenType> &get_keywords();
 
 } // namespace lox
 

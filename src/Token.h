@@ -39,8 +39,19 @@ class Token {
     }
   }
 
+  auto type() const { return type_; }
+
+  auto number() const { return number_; }
+
+  auto string() const { return string_; }
+
+  auto location() const {
+    return Location{}.line(line_).chr(offset_).end_chr(offset_ +
+                                                       lexeme_.length());
+  }
+
   // TODO: use abseil string builders
-  operator std::string() {
+  operator std::string() const {
     std::string val;
     val.append(to_string(type_));
     val.append(" ");
