@@ -5,4 +5,4 @@ namespace lox {
   ABSL_ASSERT(false && "Unreachable reached!");
   __builtin_unreachable();
 }
-}
+} // namespace lox

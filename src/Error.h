@@ -54,6 +54,15 @@ class ParseError : public std::exception {
   Location const &location() const noexcept { return loc_; }
 };
 
+class RuntimeError : public std::exception {
+  std::string msg_;
+
+ public:
+  RuntimeError(absl::string_view msg)
+      : msg_(msg) {}
+  virtual const char *what() const noexcept { return msg_.c_str(); }
+};
+
 } // namespace lox
 
 #endif // LOX_ERROR_H_

@@ -16,6 +16,7 @@ class Parser {
   std::vector<Token> tokens_;
   int current_;
 
+  std::shared_ptr<Expr> comma();
   std::shared_ptr<Expr> comparison();
   std::shared_ptr<Expr> equality();
   std::shared_ptr<Expr> expression();
@@ -26,6 +27,7 @@ class Parser {
 
   const Token &consume(TokenType, absl::string_view);
   bool match(const TokenTypeList &);
+  void sync();
 
   const Token &advance() { return tokens_[at_end() ? current_ : current_++]; }
 

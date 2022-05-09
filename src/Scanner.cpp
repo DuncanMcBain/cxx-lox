@@ -74,6 +74,8 @@ void Scanner::scan_token() {
   case '+': add_token(PLUS); break;
   case ';': add_token(SEMICOLON); break;
   case '*': add_token(STAR); break;
+  case '?': add_token(QUESTION); break;
+  case ':': add_token(COLON); break;
   case '!': add_token(match('=') ? BANG_EQ : BANG); break;
   case '=': add_token(match('=') ? EQ_EQ : EQ); break;
   case '<': add_token(match('=') ? LESS_EQ : LESS); break;

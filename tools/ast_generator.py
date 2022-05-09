@@ -30,8 +30,8 @@ def defineType(basename, classname, fields):
     for field in fields:
         ret.append('{} {};\n'.format(*field))
     ret.extend(defineConstructor(classname, fields))
-    ret.append('void accept(Visitor& v) override')
-    ret.append('{{ v.visit{}{}(*this); }}'.format(classname, basename))
+    ret.append('ExprResult accept(Visitor& v) override')
+    ret.append('{{ return v.visit{}{}(*this); }}'.format(classname, basename))
     ret.append('};\n\n')
     return ret
 
@@ -40,7 +40,7 @@ def defineVisitor(basename, types):
     ret = []
     ret.append('struct Visitor {\n')
     for typ in types:
-        ret.append('virtual void visit{0}{1}({0}&);\n'.format(typ, basename))
+        ret.append('virtual ExprResult visit{0}{1}({0}&);\n'.format(typ, basename))
     ret.append('};\n\n')
     return ret
 
@@ -50,11 +50,14 @@ def defineAST(dir, basename, types):
     lines.append('#ifndef LOX_{0}_H_\n#define LOX_{0}_H_\n\n'.format(
         basename.upper()))
     lines.append('#include "Token.h"\n\n')
+    lines.append('#include <cstddef>\n')
     lines.append('#include <memory>\n')
-    lines.append('#include <string>\n\n')
+    lines.append('#include <string>\n')
+    lines.append('#include <variant>\n\n')
+    lines.append('using ExprResult = std::variant<bool, double, std::string, std::nullptr_t>;\n\n')
     lines.append('namespace lox {\n\n')
     lines.append('struct Visitor;\n\n')
-    lines.append('struct {} {{\nvirtual void accept(Visitor&) = 0;\n'.format(
+    lines.append('struct {} {{\nvirtual ExprResult accept(Visitor&) = 0;\n'.format(
         basename))
     lines.append('virtual ~{}() = default;\n}};\n\n'.format(basename))
     for typ in iter(types):
@@ -77,12 +80,12 @@ def main():
         return 1
     out_dir = sys.argv[1]
     classes = {
-            "Binary": [("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_"), ("Token", "op_")],
-            "Grouping"  : [("std::shared_ptr<Expr>", "expr_")],
+        "Binary"     : [("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_"), ("Token", "op_")],
+        "Grouping"   : [("std::shared_ptr<Expr>", "expr_")],
         "BoolLiteral": [("bool", "value_")],
         "StrLiteral" : [("std::string", "value_")],
         "NullLiteral": [],
-        "NumLiteral" : [("double", "literal_")],
+        "NumLiteral" : [("double", "value_")],
         "Unary"      : [("std::shared_ptr<Expr>", "right_"), ("Token", "op_")]
     }
     defineAST(out_dir, "Expr", classes)

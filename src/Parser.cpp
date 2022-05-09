@@ -18,7 +18,37 @@ const Token &Parser::consume(TokenType type, absl::string_view msg) {
   throw ParseError(msg, peek().location());
 }
 
-std::shared_ptr<Expr> Parser::expression() { return equality(); }
+void Parser::sync() {
+  using enum TokenType;
+  advance();
+  while (!at_end()) {
+    if (prev().type() == SEMICOLON) { return; }
+    switch (peek().type()) {
+    case CLASS:
+    case FOR:
+    case FUN:
+    case IF:
+    case PRINT:
+    case RETURN:
+    case VAR:
+    case WHILE: return;
+    default:;
+    }
+    advance();
+  }
+}
+
+std::shared_ptr<Expr> Parser::expression() { return comma(); }
+
+std::shared_ptr<Expr> Parser::comma() {
+  auto expr = equality();
+  while (match({TokenType::COMMA})) {
+    auto op    = prev();
+    auto right = equality();
+    expr       = std::make_shared<Binary>(expr, right, op);
+  }
+  return expr;
+}
 
 // TODO: make these all one instance of a template somehow? Or preprocessor?
 std::shared_ptr<Expr> Parser::equality() {
@@ -26,7 +56,7 @@ std::shared_ptr<Expr> Parser::equality() {
   while (match({TokenType::BANG_EQ, TokenType::EQ_EQ})) {
     auto op    = prev();
     auto right = comparison();
-    expr       = make_shared<Binary>(expr, right, op);
+    expr       = std::make_shared<Binary>(expr, right, op);
   }
   return expr;
 }
@@ -86,8 +116,8 @@ std::shared_ptr<Expr> Parser::primary() {
     consume(R_PAREN, "Expected ')' after expression to match '('");
     return std::make_shared<Grouping>(expr);
   }
-  if (match({EOF})) { throw ParseError("Unexpeced EOF!", Location{}); }
-  // unreachable();
+
+  throw ParseError("Expected expression", tokens_[current_].location());
 }
 
 } // namespace lox

@@ -3,16 +3,20 @@
 
 #include "Token.h"
 
+#include <cstddef>
 #include <memory>
 #include <string>
+#include <variant>
+
+using ExprResult = std::variant<bool, double, std::string, std::nullptr_t>;
 
 namespace lox {
 
 struct Visitor;
 
 struct Expr {
-  virtual void accept(Visitor &) = 0;
-  virtual ~Expr()                = default;
+  virtual ExprResult accept(Visitor &) = 0;
+  virtual ~Expr()                      = default;
 };
 
 struct Binary;
@@ -24,13 +28,13 @@ struct NumLiteral;
 struct Unary;
 
 struct Visitor {
-  virtual void visitBinaryExpr(Binary &);
-  virtual void visitGroupingExpr(Grouping &);
-  virtual void visitBoolLiteralExpr(BoolLiteral &);
-  virtual void visitStrLiteralExpr(StrLiteral &);
-  virtual void visitNullLiteralExpr(NullLiteral &);
-  virtual void visitNumLiteralExpr(NumLiteral &);
-  virtual void visitUnaryExpr(Unary &);
+  virtual ExprResult visitBinaryExpr(Binary &);
+  virtual ExprResult visitGroupingExpr(Grouping &);
+  virtual ExprResult visitBoolLiteralExpr(BoolLiteral &);
+  virtual ExprResult visitStrLiteralExpr(StrLiteral &);
+  virtual ExprResult visitNullLiteralExpr(NullLiteral &);
+  virtual ExprResult visitNumLiteralExpr(NumLiteral &);
+  virtual ExprResult visitUnaryExpr(Unary &);
 };
 
 struct Binary : Expr {
@@ -41,40 +45,48 @@ struct Binary : Expr {
       : left_(left)
       , right_(right)
       , op_(op) {}
-  void accept(Visitor &v) override { v.visitBinaryExpr(*this); }
+  ExprResult accept(Visitor &v) override { return v.visitBinaryExpr(*this); }
 };
 
 struct Grouping : Expr {
   std::shared_ptr<Expr> expr_;
   Grouping(std::shared_ptr<Expr> expr)
       : expr_(expr) {}
-  void accept(Visitor &v) override { v.visitGroupingExpr(*this); }
+  ExprResult accept(Visitor &v) override { return v.visitGroupingExpr(*this); }
 };
 
 struct BoolLiteral : Expr {
   bool value_;
   BoolLiteral(bool value)
       : value_(value) {}
-  void accept(Visitor &v) override { v.visitBoolLiteralExpr(*this); }
+  ExprResult accept(Visitor &v) override {
+    return v.visitBoolLiteralExpr(*this);
+  }
 };
 
 struct StrLiteral : Expr {
   std::string value_;
   StrLiteral(std::string value)
       : value_(value) {}
-  void accept(Visitor &v) override { v.visitStrLiteralExpr(*this); }
+  ExprResult accept(Visitor &v) override {
+    return v.visitStrLiteralExpr(*this);
+  }
 };
 
 struct NullLiteral : Expr {
   NullLiteral() {}
-  void accept(Visitor &v) override { v.visitNullLiteralExpr(*this); }
+  ExprResult accept(Visitor &v) override {
+    return v.visitNullLiteralExpr(*this);
+  }
 };
 
 struct NumLiteral : Expr {
-  double literal_;
-  NumLiteral(double literal)
-      : literal_(literal) {}
-  void accept(Visitor &v) override { v.visitNumLiteralExpr(*this); }
+  double value_;
+  NumLiteral(double value)
+      : value_(value) {}
+  ExprResult accept(Visitor &v) override {
+    return v.visitNumLiteralExpr(*this);
+  }
 };
 
 struct Unary : Expr {
@@ -83,7 +95,7 @@ struct Unary : Expr {
   Unary(std::shared_ptr<Expr> right, Token op)
       : right_(right)
       , op_(op) {}
-  void accept(Visitor &v) override { v.visitUnaryExpr(*this); }
+  ExprResult accept(Visitor &v) override { return v.visitUnaryExpr(*this); }
 };
 
 } // namespace lox
