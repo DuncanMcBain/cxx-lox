@@ -23,6 +23,7 @@ class Parser {
   std::shared_ptr<Expr> factor();
   std::shared_ptr<Expr> primary();
   std::shared_ptr<Expr> term();
+  std::shared_ptr<Expr> ternary();
   std::shared_ptr<Expr> unary();
 
   const Token &consume(TokenType, absl::string_view);

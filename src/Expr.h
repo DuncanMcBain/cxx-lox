@@ -20,6 +20,7 @@ struct Expr {
 };
 
 struct Binary;
+struct Ternary;
 struct Grouping;
 struct BoolLiteral;
 struct StrLiteral;
@@ -29,6 +30,7 @@ struct Unary;
 
 struct Visitor {
   virtual ExprResult visitBinaryExpr(Binary &);
+  virtual ExprResult visitTernaryExpr(Ternary &);
   virtual ExprResult visitGroupingExpr(Grouping &);
   virtual ExprResult visitBoolLiteralExpr(BoolLiteral &);
   virtual ExprResult visitStrLiteralExpr(StrLiteral &);
@@ -46,6 +48,18 @@ struct Binary : Expr {
       , right_(right)
       , op_(op) {}
   ExprResult accept(Visitor &v) override { return v.visitBinaryExpr(*this); }
+};
+
+struct Ternary : Expr {
+  std::shared_ptr<Expr> cond_;
+  std::shared_ptr<Expr> left_;
+  std::shared_ptr<Expr> right_;
+  Ternary(std::shared_ptr<Expr> cond, std::shared_ptr<Expr> left,
+          std::shared_ptr<Expr> right)
+      : cond_(cond)
+      , left_(left)
+      , right_(right) {}
+  ExprResult accept(Visitor &v) override { return v.visitTernaryExpr(*this); }
 };
 
 struct Grouping : Expr {

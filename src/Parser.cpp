@@ -50,6 +50,17 @@ std::shared_ptr<Expr> Parser::comma() {
   return expr;
 }
 
+std::shared_ptr<Expr> Parser::ternary() {
+  using enum TokenType;
+  auto cond = expression();
+  if (match({QUESTION})) {
+    auto left = expression();
+    consume(COLON, "Expected ':' to match '?' in ternary expr");
+    auto right = expression();
+    return std::make_shared<Ternary>(cond, left, right);
+  }
+}
+
 // TODO: make these all one instance of a template somehow? Or preprocessor?
 std::shared_ptr<Expr> Parser::equality() {
   auto expr = comparison();

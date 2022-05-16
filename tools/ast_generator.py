@@ -81,6 +81,7 @@ def main():
     out_dir = sys.argv[1]
     classes = {
         "Binary"     : [("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_"), ("Token", "op_")],
+        "Ternary"     : [("std::shared_ptr<Expr>", "cond_"), ("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_")],
         "Grouping"   : [("std::shared_ptr<Expr>", "expr_")],
         "BoolLiteral": [("bool", "value_")],
         "StrLiteral" : [("std::string", "value_")],

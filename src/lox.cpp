@@ -1,4 +1,5 @@
 #include "Error.h"
+#include "Interpreter.h"
 #include "Parser.h"
 #include "Scanner.h"
 
@@ -64,6 +65,8 @@ std::error_code run(std::string &&src) {
   auto tokens = scan.tokenise();
   for (auto t : tokens) { fmt::print("token: {}\n", std::string(t)); }
   lox::Parser p(std::move(tokens));
-  p.parse();
+  auto tree = p.parse();
+  static lox::Interpreter interpreter;
+  interpreter.interpret(tree);
   return std::error_code{};
 }
