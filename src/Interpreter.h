@@ -17,21 +17,23 @@ using StatementsList = absl::InlinedVector<std::unique_ptr<Stmt>, 16>;
 class Interpreter
     : public expr::Visitor
     , stmt::Visitor {
-  ExprResult evaluate(std::shared_ptr<Expr> expr);
+  ExprResult evaluate(std::shared_ptr<Expr>);
   void execute(Stmt &stmt) { stmt.accept(*this); }
   std::string to_string(ExprResult);
 
  public:
-  ExprResult visitBoolLiteralExpr(BoolLiteral &l) override { return l.value_; }
+  ExprResult visitBoolLiteralExpr(BoolLiteral &b) override { return b.value_; }
   ExprResult visitNumLiteralExpr(NumLiteral &l) override { return l.value_; }
-  ExprResult visitStrLiteralExpr(StrLiteral &l) override { return l.value_; }
+  ExprResult visitStrLiteralExpr(StrLiteral &s) override { return s.value_; }
+  ExprResult visitNullLiteralExpr(NullLiteral &n) override { return nullptr; }
   ExprResult visitGroupExpr(Group &g) override { return evaluate(g.expr_); }
-  ExprResult visitBinaryExpr(Binary &b) override;
-  ExprResult visitUnaryExpr(Unary &u) override;
+  ExprResult visitBinaryExpr(Binary &) override;
+  ExprResult visitTernaryExpr(Ternary &) override;
+  ExprResult visitUnaryExpr(Unary &) override;
 
-  void visitExpressionStmt(Expression &e) override;
+  void visitExpressionStmt(Expression &) override;
 
-  void interpret(StatementsList &&l);
+  void interpret(StatementsList &&);
 };
 
 } // namespace lox

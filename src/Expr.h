@@ -35,14 +35,15 @@ struct Unary;
 namespace expr {
 
 struct Visitor {
-  virtual ExprResult visitBinaryExpr(Binary &);
-  virtual ExprResult visitTernaryExpr(Ternary &);
-  virtual ExprResult visitGroupExpr(Group &);
-  virtual ExprResult visitBoolLiteralExpr(BoolLiteral &);
-  virtual ExprResult visitStrLiteralExpr(StrLiteral &);
-  virtual ExprResult visitNullLiteralExpr(NullLiteral &);
-  virtual ExprResult visitNumLiteralExpr(NumLiteral &);
-  virtual ExprResult visitUnaryExpr(Unary &);
+  virtual ExprResult visitBinaryExpr(Binary &)           = 0;
+  virtual ExprResult visitTernaryExpr(Ternary &)         = 0;
+  virtual ExprResult visitGroupExpr(Group &)             = 0;
+  virtual ExprResult visitBoolLiteralExpr(BoolLiteral &) = 0;
+  virtual ExprResult visitStrLiteralExpr(StrLiteral &)   = 0;
+  virtual ExprResult visitNullLiteralExpr(NullLiteral &) = 0;
+  virtual ExprResult visitNumLiteralExpr(NumLiteral &)   = 0;
+  virtual ExprResult visitUnaryExpr(Unary &)             = 0;
+  virtual ~Visitor()                                     = default;
 };
 
 } // namespace expr

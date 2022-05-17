@@ -7,8 +7,7 @@ add_executable(cxx_loxi
   KeywordNames.cpp
   Parser.cpp
   Scanner.cpp
-  TokenTypes.cpp
-  Visitor.cpp)
+  TokenTypes.cpp)
 
 set_property(TARGET cxx_loxi PROPERTY CXX_STANDARD 20)
 target_link_libraries(cxx_loxi
@@ -16,6 +15,5 @@ target_link_libraries(cxx_loxi
     absl::base
     absl::inlined_vector
     absl::strings
-    fmt::fmt
-    mio::mio)
+    fmt::fmt)
 

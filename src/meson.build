@@ -8,7 +8,6 @@ cxx_loxi = executable(
   'Parser.cpp',
   'Scanner.cpp',
   'TokenTypes.cpp',
-  'Visitor.cpp',
   ],
   dependencies: [absl_dep, fmt_dep],
 )

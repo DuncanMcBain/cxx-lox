@@ -43,7 +43,8 @@ def defineVisitor(basename, types):
     ret.append('struct Visitor {\n')
     return_type = 'void' if basename == 'Stmt' else 'ExprResult'
     for typ in types:
-        ret.append('virtual {2} visit{0}{1}({0}&);\n'.format(typ, basename, return_type))
+        ret.append('virtual {2} visit{0}{1}({0}&) = 0;\n'.format(typ, basename, return_type))
+    ret.append('virtual ~Visitor() = default;')
     ret.append('};\n\n')
     ret.append('}}  // namespace {}\n\n'.format(basename.lower()))
     return ret

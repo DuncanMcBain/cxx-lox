@@ -27,7 +27,8 @@ struct Expression;
 namespace stmt {
 
 struct Visitor {
-  virtual void visitExpressionStmt(Expression &);
+  virtual void visitExpressionStmt(Expression &) = 0;
+  virtual ~Visitor()                             = default;
 };
 
 } // namespace stmt
