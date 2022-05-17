@@ -7,11 +7,11 @@
 
 #include <fmt/core.h>
 
-#include <mio/mmap.hpp>
-
 // TODO: replace this?
 #include <iostream>
 #include <string>
+#include <filesystem>
+#include <fstream>
 
 #include <sysexits.h>
 
@@ -41,9 +41,13 @@ int main(int argc, char *argv[]) {
 std::error_code run_file(absl::string_view file_name, lox::Location &loc) {
   std::error_code err;
   loc.where(file_name);
-  auto source = mio::make_mmap_source(file_name, err);
-  if (err) { return err; }
-  std::string src(source.begin(), source.end());
+  // file_size takes a string_view, but ifstream doesn't. Just use the
+  // string-terface
+  const auto path = std::string(file_name);
+  std::ifstream f(path, std::ios::in | std::ios::binary);
+  const size_t size = std::filesystem::file_size(path);
+  std::string src(size, '\0');
+  f.read(src.data(), size);
   return run(std::move(src));
 }
 
