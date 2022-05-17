@@ -12,32 +12,40 @@ using ExprResult = std::variant<bool, double, std::string, std::nullptr_t>;
 
 namespace lox {
 
+namespace expr {
+
 struct Visitor;
 
+} // namespace expr
+
 struct Expr {
-  virtual ExprResult accept(Visitor &) = 0;
-  virtual ~Expr()                      = default;
+  virtual ExprResult accept(expr::Visitor &) = 0;
+  virtual ~Expr()                            = default;
 };
 
 struct Binary;
 struct Ternary;
-struct Grouping;
+struct Group;
 struct BoolLiteral;
 struct StrLiteral;
 struct NullLiteral;
 struct NumLiteral;
 struct Unary;
 
+namespace expr {
+
 struct Visitor {
   virtual ExprResult visitBinaryExpr(Binary &);
   virtual ExprResult visitTernaryExpr(Ternary &);
-  virtual ExprResult visitGroupingExpr(Grouping &);
+  virtual ExprResult visitGroupExpr(Group &);
   virtual ExprResult visitBoolLiteralExpr(BoolLiteral &);
   virtual ExprResult visitStrLiteralExpr(StrLiteral &);
   virtual ExprResult visitNullLiteralExpr(NullLiteral &);
   virtual ExprResult visitNumLiteralExpr(NumLiteral &);
   virtual ExprResult visitUnaryExpr(Unary &);
 };
+
+} // namespace expr
 
 struct Binary : Expr {
   std::shared_ptr<Expr> left_;
@@ -47,7 +55,9 @@ struct Binary : Expr {
       : left_(left)
       , right_(right)
       , op_(op) {}
-  ExprResult accept(Visitor &v) override { return v.visitBinaryExpr(*this); }
+  ExprResult accept(expr::Visitor &v) override {
+    return v.visitBinaryExpr(*this);
+  }
 };
 
 struct Ternary : Expr {
@@ -59,21 +69,25 @@ struct Ternary : Expr {
       : cond_(cond)
       , left_(left)
       , right_(right) {}
-  ExprResult accept(Visitor &v) override { return v.visitTernaryExpr(*this); }
+  ExprResult accept(expr::Visitor &v) override {
+    return v.visitTernaryExpr(*this);
+  }
 };
 
-struct Grouping : Expr {
+struct Group : Expr {
   std::shared_ptr<Expr> expr_;
-  Grouping(std::shared_ptr<Expr> expr)
+  Group(std::shared_ptr<Expr> expr)
       : expr_(expr) {}
-  ExprResult accept(Visitor &v) override { return v.visitGroupingExpr(*this); }
+  ExprResult accept(expr::Visitor &v) override {
+    return v.visitGroupExpr(*this);
+  }
 };
 
 struct BoolLiteral : Expr {
   bool value_;
   BoolLiteral(bool value)
       : value_(value) {}
-  ExprResult accept(Visitor &v) override {
+  ExprResult accept(expr::Visitor &v) override {
     return v.visitBoolLiteralExpr(*this);
   }
 };
@@ -82,14 +96,14 @@ struct StrLiteral : Expr {
   std::string value_;
   StrLiteral(std::string value)
       : value_(value) {}
-  ExprResult accept(Visitor &v) override {
+  ExprResult accept(expr::Visitor &v) override {
     return v.visitStrLiteralExpr(*this);
   }
 };
 
 struct NullLiteral : Expr {
   NullLiteral() {}
-  ExprResult accept(Visitor &v) override {
+  ExprResult accept(expr::Visitor &v) override {
     return v.visitNullLiteralExpr(*this);
   }
 };
@@ -98,7 +112,7 @@ struct NumLiteral : Expr {
   double value_;
   NumLiteral(double value)
       : value_(value) {}
-  ExprResult accept(Visitor &v) override {
+  ExprResult accept(expr::Visitor &v) override {
     return v.visitNumLiteralExpr(*this);
   }
 };
@@ -109,7 +123,9 @@ struct Unary : Expr {
   Unary(std::shared_ptr<Expr> right, Token op)
       : right_(right)
       , op_(op) {}
-  ExprResult accept(Visitor &v) override { return v.visitUnaryExpr(*this); }
+  ExprResult accept(expr::Visitor &v) override {
+    return v.visitUnaryExpr(*this);
+  }
 };
 
 } // namespace lox

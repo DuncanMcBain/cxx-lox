@@ -67,6 +67,6 @@ std::error_code run(std::string &&src) {
   lox::Parser p(std::move(tokens));
   auto tree = p.parse();
   static lox::Interpreter interpreter;
-  interpreter.interpret(tree);
+  interpreter.interpret(std::move(tree));
   return std::error_code{};
 }

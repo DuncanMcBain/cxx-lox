@@ -38,10 +38,18 @@ void Parser::sync() {
   }
 }
 
+std::unique_ptr<Stmt> Parser::statement() { return exprstmt(); }
+
+std::unique_ptr<Stmt> Parser::exprstmt() {
+  auto expr = expression();
+  consume(TokenType::SEMICOLON, "Expected `;` after expression");
+  return std::make_unique<Expression>(expr);
+}
+
 std::shared_ptr<Expr> Parser::expression() { return comma(); }
 
 std::shared_ptr<Expr> Parser::comma() {
-  auto expr = equality();
+  auto expr = ternary();
   while (match({TokenType::COMMA})) {
     auto op    = prev();
     auto right = equality();
@@ -52,13 +60,14 @@ std::shared_ptr<Expr> Parser::comma() {
 
 std::shared_ptr<Expr> Parser::ternary() {
   using enum TokenType;
-  auto cond = expression();
+  auto cond = equality();
   if (match({QUESTION})) {
-    auto left = expression();
+    auto left = equality();
     consume(COLON, "Expected ':' to match '?' in ternary expr");
-    auto right = expression();
+    auto right = equality();
     return std::make_shared<Ternary>(cond, left, right);
   }
+  return cond;
 }
 
 // TODO: make these all one instance of a template somehow? Or preprocessor?
@@ -125,7 +134,7 @@ std::shared_ptr<Expr> Parser::primary() {
   if (match({L_PAREN})) {
     auto expr = expression();
     consume(R_PAREN, "Expected ')' after expression to match '('");
-    return std::make_shared<Grouping>(expr);
+    return std::make_shared<Group>(expr);
   }
 
   throw ParseError("Expected expression", tokens_[current_].location());

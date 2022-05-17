@@ -2,15 +2,18 @@
 #define LOX_PARSER_H_
 
 #include "Expr.h"
+#include "Stmt.h"
 #include "Token.h"
+#include "Utils.h"
 
 #include <absl/container/inlined_vector.h>
 
 #include <memory>
 
-using TokenTypeList = absl::InlinedVector<lox::TokenType, 4>;
-
 namespace lox {
+
+using TokenTypeList  = absl::InlinedVector<lox::TokenType, 4>;
+using StatementsList = absl::InlinedVector<std::unique_ptr<lox::Stmt>, 16>;
 
 class Parser {
   std::vector<Token> tokens_;
@@ -25,6 +28,9 @@ class Parser {
   std::shared_ptr<Expr> term();
   std::shared_ptr<Expr> ternary();
   std::shared_ptr<Expr> unary();
+
+  std::unique_ptr<Stmt> exprstmt();
+  std::unique_ptr<Stmt> statement();
 
   const Token &consume(TokenType, absl::string_view);
   bool match(const TokenTypeList &);
@@ -51,14 +57,10 @@ class Parser {
       : tokens_(tokens)
       , current_(0) {}
 
-  // TODO: using statement Expression = shared_ptr<Expr>
-  std::shared_ptr<Expr> parse() {
-    try {
-      return expression();
-    } catch (const ParseError &error) {
-      report_error(error.what(), error.location());
-      return nullptr;
-    }
+  StatementsList parse() {
+    StatementsList statements;
+    while (!at_end()) { statements.push_back(statement()); }
+    return statements;
   }
 };
 
