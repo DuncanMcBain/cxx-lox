@@ -5,6 +5,7 @@
 #include "TokenTypes.h"
 
 #include <absl/strings/numbers.h>
+#include <absl/strings/str_cat.h>
 #include <absl/strings/string_view.h>
 
 namespace lox {
@@ -50,20 +51,16 @@ class Token {
                                                        lexeme_.length());
   }
 
-  // TODO: use abseil string builders
   operator std::string() const {
-    std::string val;
-    val.append(to_string(type_));
-    val.append(" ");
-    switch (type_) {
-    case TokenType::IDENT: val.append(identifier_); break;
-    case TokenType::STRING: val.append(string_); break;
-    case TokenType::NUMBER: val.append(std::to_string(number_)); break;
-    default: break;
-    }
-    val.append(" lexeme ");
-    val.append(lexeme_);
-    return val;
+    auto value = [&]() -> std::string {
+      switch (type_) {
+      case TokenType::IDENT: return identifier_;
+      case TokenType::STRING: return string_;
+      case TokenType::NUMBER: return std::to_string(number_);
+      default: return "";
+      }
+    }();
+    return absl::StrCat(to_string(type_), " ", value, " lexeme ", lexeme_);
   }
 };
 
