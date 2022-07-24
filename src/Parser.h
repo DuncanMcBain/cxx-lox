@@ -29,8 +29,10 @@ class Parser {
   std::shared_ptr<Expr> ternary();
   std::shared_ptr<Expr> unary();
 
+  std::unique_ptr<Stmt> declaration();
   std::unique_ptr<Stmt> exprstmt();
   std::unique_ptr<Stmt> statement();
+  std::unique_ptr<Stmt> var_declaration();
 
   const Token &consume(TokenType, absl::string_view);
   bool match(const TokenTypeList &);
@@ -59,7 +61,7 @@ class Parser {
 
   StatementsList parse() {
     StatementsList statements;
-    while (!at_end()) { statements.push_back(statement()); }
+    while (!at_end()) { statements.push_back(declaration()); }
     return statements;
   }
 };

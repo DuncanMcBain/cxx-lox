@@ -93,15 +93,17 @@ def main():
     classes = {
         "Binary"     : [("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_"), ("Token", "op_")],
         "Ternary"    : [("std::shared_ptr<Expr>", "cond_"), ("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_")],
-        "Group"   : [("std::shared_ptr<Expr>", "expr_")],
+        "Group"      : [("std::shared_ptr<Expr>", "expr_")],
         "BoolLiteral": [("bool", "value_")],
         "StrLiteral" : [("std::string", "value_")],
         "NullLiteral": [],
         "NumLiteral" : [("double", "value_")],
+        "Variable"   : [("Token", "name_")],
         "Unary"      : [("std::shared_ptr<Expr>", "right_"), ("Token", "op_")]
     }
     stmt_classes = {
-        "Expression": [("std::shared_ptr<Expr>", "expression_")]
+        "Expression": [("std::shared_ptr<Expr>", "expression_")],
+        "Var"       : [("Token", "name_"), ("std::shared_ptr<Expr>", "initialiser_")],
     }
     defineAST(out_dir, "Expr", classes)
     defineAST(out_dir, "Stmt", stmt_classes)

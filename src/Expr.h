@@ -30,6 +30,7 @@ struct BoolLiteral;
 struct StrLiteral;
 struct NullLiteral;
 struct NumLiteral;
+struct Variable;
 struct Unary;
 
 namespace expr {
@@ -42,6 +43,7 @@ struct Visitor {
   virtual ExprResult visitStrLiteralExpr(StrLiteral &)   = 0;
   virtual ExprResult visitNullLiteralExpr(NullLiteral &) = 0;
   virtual ExprResult visitNumLiteralExpr(NumLiteral &)   = 0;
+  virtual ExprResult visitVariableExpr(Variable &)       = 0;
   virtual ExprResult visitUnaryExpr(Unary &)             = 0;
   virtual ~Visitor()                                     = default;
 };
@@ -115,6 +117,15 @@ struct NumLiteral : Expr {
       : value_(value) {}
   ExprResult accept(expr::Visitor &v) override {
     return v.visitNumLiteralExpr(*this);
+  }
+};
+
+struct Variable : Expr {
+  Token name_;
+  Variable(Token name)
+      : name_(name) {}
+  ExprResult accept(expr::Visitor &v) override {
+    return v.visitVariableExpr(*this);
   }
 };
 

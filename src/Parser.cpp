@@ -38,6 +38,25 @@ void Parser::sync() {
   }
 }
 
+std::unique_ptr<Stmt> Parser::declaration() {
+  try {
+    if (match({TokenType::VAR})) {
+      return var_declaration();
+    }
+    return statement();
+  } catch (const ParseError &pe) {
+    sync();
+    return nullptr;
+  }
+}
+
+std::unique_ptr<Stmt> Parser::var_declaration() {
+  auto name = consume(TokenType::IDENT, "Expected variable name");
+  auto initialiser = match({TokenType::EQ}) ? expression() : nullptr;
+  consume(TokenType::SEMICOLON, "Expected ';' after variable declaration");
+  return std::make_unique<Var>(name, initialiser);
+}
+
 std::unique_ptr<Stmt> Parser::statement() { return exprstmt(); }
 
 std::unique_ptr<Stmt> Parser::exprstmt() {
@@ -129,7 +148,9 @@ std::shared_ptr<Expr> Parser::primary() {
   if (match({NUMBER})) { return std::make_shared<NumLiteral>(prev().number()); }
   // TODO: change this to clarify ownership, what will live longest? Probably
   // the expression node so string should live in it, views everywhere else
-  if (match({STRING})) { return std::make_shared<StrLiteral>(prev().string()); }
+  if (match({STRING})) { return std::make_shared<StrLiteral>(std::string(prev().string())); }
+
+  if (match({IDENT})) { return std::make_shared<Variable>(prev()); }
 
   if (match({L_PAREN})) {
     auto expr = expression();

@@ -23,11 +23,13 @@ struct Stmt {
 };
 
 struct Expression;
+struct Var;
 
 namespace stmt {
 
 struct Visitor {
   virtual void visitExpressionStmt(Expression &) = 0;
+  virtual void visitVarStmt(Var &)               = 0;
   virtual ~Visitor()                             = default;
 };
 
@@ -40,6 +42,15 @@ struct Expression : Stmt {
   void accept(stmt::Visitor &v) override {
     return v.visitExpressionStmt(*this);
   }
+};
+
+struct Var : Stmt {
+  Token name_;
+  std::shared_ptr<Expr> initialiser_;
+  Var(Token name, std::shared_ptr<Expr> initialiser)
+      : name_(name)
+      , initialiser_(initialiser) {}
+  void accept(stmt::Visitor &v) override { return v.visitVarStmt(*this); }
 };
 
 } // namespace lox

@@ -85,9 +85,18 @@ ExprResult Interpreter::visitUnaryExpr(Unary &u) {
   }
 }
 
+ExprResult Interpreter::visitVariableExpr(Variable & v) {
+  return env_.get(v.name_);
+}
+
 // TODO: remove the forced print when the print-as-function is implemented
 void Interpreter::visitExpressionStmt(Expression &e) {
   fmt::print("{}\n", to_string(evaluate(e.expression_)));
+}
+
+void Interpreter::visitVarStmt(Var& v) {
+  env_.define(v.name_.lexeme(),
+      v.initialiser_ ? evaluate(v.initialiser_) : nullptr);
 }
 
 void Interpreter::interpret(StatementsList &&list) {

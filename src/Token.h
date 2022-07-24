@@ -13,8 +13,8 @@ namespace lox {
 class Token {
   TokenType type_;
   absl::string_view lexeme_;
-  std::string identifier_;
-  std::string string_;
+  absl::string_view identifier_;
+  absl::string_view string_;
   double number_ = 0.;
   int line_;
   size_t offset_;
@@ -41,10 +41,10 @@ class Token {
   }
 
   auto type() const { return type_; }
-
-  auto number() const { return number_; }
-
+  auto lexeme() const { return lexeme_; }
+  auto identifier() const { return identifier_; }
   auto string() const { return string_; }
+  auto number() const { return number_; }
 
   auto location() const {
     return Location{}.line(line_).chr(offset_).end_chr(offset_ +
@@ -54,8 +54,8 @@ class Token {
   operator std::string() const {
     auto value = [&]() -> std::string {
       switch (type_) {
-      case TokenType::IDENT: return identifier_;
-      case TokenType::STRING: return string_;
+        case TokenType::IDENT: return std::string(identifier_);
+        case TokenType::STRING: return std::string(string_);
       case TokenType::NUMBER: return std::to_string(number_);
       default: return "";
       }

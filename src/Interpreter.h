@@ -1,6 +1,7 @@
 #ifndef LOX_INTERPRETER_H_
 #define LOX_INTERPRETER_H_
 
+#include "Environment.h"
 #include "Expr.h"
 #include "Stmt.h"
 #include "Utils.h"
@@ -17,6 +18,8 @@ using StatementsList = absl::InlinedVector<std::unique_ptr<Stmt>, 16>;
 class Interpreter
     : public expr::Visitor
     , stmt::Visitor {
+  Environment env_;
+
   ExprResult evaluate(std::shared_ptr<Expr>);
   void execute(Stmt &stmt) { stmt.accept(*this); }
   std::string to_string(ExprResult);
@@ -30,8 +33,10 @@ class Interpreter
   ExprResult visitBinaryExpr(Binary &) override;
   ExprResult visitTernaryExpr(Ternary &) override;
   ExprResult visitUnaryExpr(Unary &) override;
+  ExprResult visitVariableExpr(Variable &) override;
 
   void visitExpressionStmt(Expression &) override;
+  void visitVarStmt(Var &) override;
 
   void interpret(StatementsList &&);
 };
