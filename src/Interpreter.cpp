@@ -73,9 +73,7 @@ ExprResult Interpreter::visitBinaryExpr(Binary &b) {
 
 ExprResult Interpreter::visitTernaryExpr(Ternary &t) {
   auto cond = std::get<bool>(evaluate(t.cond_));
-  auto left = evaluate(t.left_);
-  auto right = evaluate(t.right_);
-  return cond ? left : right;
+  return cond ? evaluate(t.left_) : evaluate(t.right_);
 }
 
 ExprResult Interpreter::visitUnaryExpr(Unary &u) {
