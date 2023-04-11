@@ -23,6 +23,7 @@ struct Expr {
   virtual ~Expr()                            = default;
 };
 
+struct Assign;
 struct Binary;
 struct Ternary;
 struct Group;
@@ -36,6 +37,7 @@ struct Unary;
 namespace expr {
 
 struct Visitor {
+  virtual ExprResult visitAssignExpr(Assign &)           = 0;
   virtual ExprResult visitBinaryExpr(Binary &)           = 0;
   virtual ExprResult visitTernaryExpr(Ternary &)         = 0;
   virtual ExprResult visitGroupExpr(Group &)             = 0;
@@ -49,6 +51,17 @@ struct Visitor {
 };
 
 } // namespace expr
+
+struct Assign : Expr {
+  Token name_;
+  std::shared_ptr<Expr> val_;
+  Assign(Token name, std::shared_ptr<Expr> val)
+      : name_(name)
+      , val_(val) {}
+  ExprResult accept(expr::Visitor &v) override {
+    return v.visitAssignExpr(*this);
+  }
+};
 
 struct Binary : Expr {
   std::shared_ptr<Expr> left_;

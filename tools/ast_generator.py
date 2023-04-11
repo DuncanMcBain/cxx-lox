@@ -91,6 +91,7 @@ def main():
         return 1
     out_dir = sys.argv[1]
     classes = {
+        "Assign"     : [("Token", "name_"), ("std::shared_ptr<Expr>", "val_")],
         "Binary"     : [("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_"), ("Token", "op_")],
         "Ternary"    : [("std::shared_ptr<Expr>", "cond_"), ("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_")],
         "Group"      : [("std::shared_ptr<Expr>", "expr_")],

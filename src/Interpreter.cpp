@@ -37,6 +37,12 @@ bool isTruthy(ExprResult obj) {
   return std::visit(tt, obj);
 }
 
+ExprResult Interpreter::visitAssignExpr(Assign& a) {
+  auto val = evaluate(a.val_);
+  env_.assign(a.name_, val);
+  return val;
+}
+
 // TODO: make the failed std::get exceptions into custom exception that
 // will track the token that caused the failure and report nicely to the user
 // This function should swallow the exceptions from either std::get or from

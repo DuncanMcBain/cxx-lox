@@ -65,7 +65,23 @@ std::unique_ptr<Stmt> Parser::exprstmt() {
   return std::make_unique<Expression>(expr);
 }
 
-std::shared_ptr<Expr> Parser::expression() { return comma(); }
+std::shared_ptr<Expr> Parser::expression() { return assignment(); }
+
+std::shared_ptr<Expr> Parser::assignment() {
+  auto expr = comma();
+
+  if (match({TokenType::EQ})) {
+    auto eq = prev();
+    auto val = assignment();
+
+    if (auto var = dynamic_cast<Variable*>(expr.get())) {
+      auto name = var->name_;
+      return std::make_shared<Assign>(name, val);
+    }
+    report_error("Invalid assignment target.", Location{});
+  }
+  return expr;
+}
 
 std::shared_ptr<Expr> Parser::comma() {
   auto expr = ternary();

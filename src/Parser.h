@@ -19,6 +19,7 @@ class Parser {
   std::vector<Token> tokens_;
   int current_;
 
+  std::shared_ptr<Expr> assignment();
   std::shared_ptr<Expr> comma();
   std::shared_ptr<Expr> comparison();
   std::shared_ptr<Expr> equality();

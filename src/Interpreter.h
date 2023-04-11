@@ -30,6 +30,7 @@ class Interpreter
   ExprResult visitStrLiteralExpr(StrLiteral &s) override { return s.value_; }
   ExprResult visitNullLiteralExpr(NullLiteral &n) override { return nullptr; }
   ExprResult visitGroupExpr(Group &g) override { return evaluate(g.expr_); }
+  ExprResult visitAssignExpr(Assign &) override;
   ExprResult visitBinaryExpr(Binary &) override;
   ExprResult visitTernaryExpr(Ternary &) override;
   ExprResult visitUnaryExpr(Unary &) override;

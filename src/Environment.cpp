@@ -2,13 +2,21 @@
 
 namespace lox {
 
-void Environment::define(absl::string_view name, ExprResult val) {
-  env.emplace(name, val);
+void Environment::assign(Token tok, ExprResult val) {
+  if (env_.find(tok.lexeme()) != env_.end()) {
+    env_[tok.lexeme()] = val;
+    return;
+  }
+  throw RuntimeError("Undefined variable: ");
 }
 
-ExprResult Environment::get(Token name) {
-  return env.find(name.string()) != env.end()
-             ? env[name.string()]
+void Environment::define(absl::string_view name, ExprResult val) {
+  env_.emplace(name, val);
+}
+
+ExprResult Environment::get(Token tok) {
+  return env_.find(tok.identifier()) != env_.end()
+             ? env_[tok.string()]
              : throw RuntimeError("Undefined variable");
 }
 

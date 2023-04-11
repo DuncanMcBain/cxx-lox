@@ -10,9 +10,10 @@ namespace lox {
 
 class Environment {
   using EnvMap = absl::flat_hash_map<std::string, ExprResult>;
-  EnvMap env;
+  EnvMap env_;
 
  public:
+  void assign(Token, ExprResult);
   void define(absl::string_view, ExprResult);
 
   ExprResult get(Token);
