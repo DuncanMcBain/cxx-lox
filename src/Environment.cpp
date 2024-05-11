@@ -7,7 +7,7 @@ void Environment::assign(Token tok, ExprResult val) {
     env_[tok.lexeme()] = val;
     return;
   }
-  throw RuntimeError("Undefined variable: ");
+  throw RuntimeError(absl::StrCat("Undefined variable: ", tok.lexeme()));
 }
 
 void Environment::define(absl::string_view name, ExprResult val) {
@@ -17,7 +17,8 @@ void Environment::define(absl::string_view name, ExprResult val) {
 ExprResult Environment::get(Token tok) {
   return env_.find(tok.identifier()) != env_.end()
              ? env_[tok.string()]
-             : throw RuntimeError("Undefined variable");
+             : throw RuntimeError(
+                   absl::StrCat("Undefined variable: ", tok.lexeme()));
 }
 
 } // namespace lox
