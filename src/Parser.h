@@ -13,7 +13,6 @@
 namespace lox {
 
 using TokenTypeList  = absl::InlinedVector<lox::TokenType, 4>;
-using StatementsList = absl::InlinedVector<std::unique_ptr<lox::Stmt>, 16>;
 
 class Parser {
   std::vector<Token> tokens_;
@@ -31,6 +30,7 @@ class Parser {
   std::shared_ptr<Expr> unary();
 
   std::unique_ptr<Stmt> declaration();
+  StatementsList        block();
   std::unique_ptr<Stmt> exprstmt();
   std::unique_ptr<Stmt> statement();
   std::unique_ptr<Stmt> var_declaration();
@@ -62,7 +62,11 @@ class Parser {
 
   StatementsList parse() {
     StatementsList statements;
-    while (!at_end()) { statements.push_back(declaration()); }
+    while (!at_end()) {
+      auto decl = declaration();
+      if (decl)
+        statements.push_back(std::move(decl));
+    }
     return statements;
   }
 };

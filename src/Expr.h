@@ -8,9 +8,9 @@
 #include <string>
 #include <variant>
 
-using ExprResult = std::variant<bool, double, std::string, std::nullptr_t>;
-
 namespace lox {
+
+using ExprResult = std::variant<bool, double, std::string, std::nullptr_t>;
 
 namespace expr {
 

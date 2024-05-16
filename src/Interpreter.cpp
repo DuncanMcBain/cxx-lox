@@ -21,7 +21,8 @@ ExprResult Interpreter::evaluate(std::shared_ptr<Expr> expr) {
 }
 
 bool isEqual(ExprResult l, ExprResult r) {
-  auto visitor = Overloaded{[](double a, double b) { return a == b; },
+  auto visitor = Overloaded{[](bool a, bool b) { return a == b; },
+                            [](double a, double b) { return a == b; },
                             [](std::string a, std::string b) { return a == b; },
                             [](std::nullptr_t, std::nullptr_t) { return true; },
                             [](auto, auto) { return false; }};
@@ -37,7 +38,7 @@ bool isTruthy(ExprResult obj) {
   return std::visit(tt, obj);
 }
 
-ExprResult Interpreter::visitAssignExpr(Assign& a) {
+ExprResult Interpreter::visitAssignExpr(Assign &a) {
   auto val = evaluate(a.val_);
   env_.assign(a.name_, val);
   return val;
@@ -91,8 +92,13 @@ ExprResult Interpreter::visitUnaryExpr(Unary &u) {
   }
 }
 
-ExprResult Interpreter::visitVariableExpr(Variable & v) {
+ExprResult Interpreter::visitVariableExpr(Variable &v) {
   return env_.get(v.name_);
+}
+
+void Interpreter::visitBlockStmt(Block &b) {
+  Environment env(&env_);
+  executeBlock(b.statements_, env);
 }
 
 // TODO: remove the forced print when the print-as-function is implemented
@@ -100,9 +106,21 @@ void Interpreter::visitExpressionStmt(Expression &e) {
   fmt::print("{}\n", to_string(evaluate(e.expression_)));
 }
 
-void Interpreter::visitVarStmt(Var& v) {
-  env_.define(v.name_.lexeme(),
-      v.initialiser_ ? evaluate(v.initialiser_) : nullptr);
+void Interpreter::visitVarStmt(Var &v) {
+  env_.define(v.name_.identifier(),
+              v.initialiser_ ? evaluate(v.initialiser_) : nullptr);
+}
+
+void Interpreter::executeBlock(StatementsList &stmts, Environment &env) {
+  auto &prev = env_;
+  try {
+    env_ = env;
+    for (auto &stmt : stmts) {
+      ABSL_ASSERT(stmt.get());
+      execute(*stmt.get());
+    }
+  } catch (...) { ; }
+  env = prev;
 }
 
 void Interpreter::interpret(StatementsList &&list) {

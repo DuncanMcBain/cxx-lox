@@ -12,8 +12,6 @@
 
 namespace lox {
 
-using StatementsList = absl::InlinedVector<std::unique_ptr<Stmt>, 16>;
-
 class Interpreter
     : public expr::Visitor
     , stmt::Visitor {
@@ -21,6 +19,7 @@ class Interpreter
 
   ExprResult evaluate(std::shared_ptr<Expr>);
   void execute(Stmt &stmt) { stmt.accept(*this); }
+  void executeBlock(StatementsList&, Environment&);
   std::string to_string(ExprResult);
 
  public:
@@ -35,6 +34,7 @@ class Interpreter
   ExprResult visitUnaryExpr(Unary &) override;
   ExprResult visitVariableExpr(Variable &) override;
 
+  void visitBlockStmt(Block &) override;
   void visitExpressionStmt(Expression &) override;
   void visitVarStmt(Var &) override;
 

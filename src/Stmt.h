@@ -4,6 +4,8 @@
 #include "Expr.h"
 #include "Token.h"
 
+#include <absl/container/inlined_vector.h>
+
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -22,18 +24,28 @@ struct Stmt {
   virtual ~Stmt()                      = default;
 };
 
+struct Block;
 struct Expression;
 struct Var;
 
 namespace stmt {
 
 struct Visitor {
+  virtual void visitBlockStmt(Block &)           = 0;
   virtual void visitExpressionStmt(Expression &) = 0;
   virtual void visitVarStmt(Var &)               = 0;
   virtual ~Visitor()                             = default;
 };
 
 } // namespace stmt
+
+using StatementsList = absl::InlinedVector<std::unique_ptr<lox::Stmt>, 8>;
+
+struct Block : Stmt {
+  StatementsList statements_;
+  Block(StatementsList&& statements) : statements_{std::move(statements)} {}
+  void accept(stmt::Visitor &v) override { return v.visitBlockStmt(*this); }
+};
 
 struct Expression : Stmt {
   std::shared_ptr<Expr> expression_;

@@ -38,6 +38,14 @@ void Parser::sync() {
   }
 }
 
+StatementsList Parser::block() {
+  StatementsList stmts;
+  while (!check(TokenType::R_BRACE) && !at_end())
+    stmts.push_back(std::move(declaration()));
+  consume(TokenType::R_BRACE, "Expected '}' after block statement");
+  return stmts;
+}
+
 std::unique_ptr<Stmt> Parser::declaration() {
   try {
     if (match({TokenType::VAR})) {
@@ -57,7 +65,11 @@ std::unique_ptr<Stmt> Parser::var_declaration() {
   return std::make_unique<Var>(name, initialiser);
 }
 
-std::unique_ptr<Stmt> Parser::statement() { return exprstmt(); }
+std::unique_ptr<Stmt> Parser::statement() {
+  if (match({TokenType::L_BRACE}))
+    return std::unique_ptr<Block>(new Block(std::move(block())));
+  return exprstmt();
+}
 
 std::unique_ptr<Stmt> Parser::exprstmt() {
   auto expr = expression();

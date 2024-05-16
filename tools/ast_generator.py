@@ -58,13 +58,15 @@ def defineAST(dir, basename, types):
     if not basename == "Expr":
         lines.append('#include "Expr.h"\n')
     lines.append('#include "Token.h"\n\n')
+    if basename == 'Stmt':
+        lines.append('#include <absl/container/inlined_vector.h>\n\n')
     lines.append('#include <cstddef>\n')
     lines.append('#include <memory>\n')
     lines.append('#include <string>\n')
     lines.append('#include <variant>\n\n')
+    lines.append('namespace lox {\n\n')
     if basename == "Expr":
         lines.append('using ExprResult = std::variant<bool, double, std::string, std::nullptr_t>;\n\n')
-    lines.append('namespace lox {\n\n')
     lines.append('namespace {} {{\n\n'.format(basename.lower()))
     lines.append('struct Visitor;\n\n')
     lines.append('}}  // namespace {}\n\n'.format(basename.lower()))
@@ -75,6 +77,8 @@ def defineAST(dir, basename, types):
         lines.extend(declareType(basename, typ))
     lines.append('\n')
     lines.extend(defineVisitor(basename, iter(types)))
+    if basename == "Stmt":
+        lines.append('using StatementsList = absl::InlinedVector<std::unique_ptr<lox::Stmt>, 8>;\n\n')
     for typ in iter(types):
         lines.extend(defineType(basename, typ, types[typ]))
     lines.append('}  // namespace lox\n#endif\n')
@@ -103,6 +107,7 @@ def main():
         "Unary"      : [("std::shared_ptr<Expr>", "right_"), ("Token", "op_")]
     }
     stmt_classes = {
+        "Block"     : [("StatementsList", "statements_")],
         "Expression": [("std::shared_ptr<Expr>", "expression_")],
         "Var"       : [("Token", "name_"), ("std::shared_ptr<Expr>", "initialiser_")],
     }
