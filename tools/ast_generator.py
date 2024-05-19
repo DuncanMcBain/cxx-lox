@@ -5,7 +5,24 @@ from pathlib import Path
 import sys
 
 
+# TODO: Improve this. It is so far the only class to be constructed differently
+# but I should still fix that in a more satisfying manner than special-casing
+def defineBlock(classname, fields):
+    ret = []
+    args = list(map(lambda x: x[1].rstrip('_'), fields))
+    ret.append(classname + '(' +
+               ', '.join(map(lambda x, y: x[0] + " &&" + y, fields, args)) + ')\n')
+    sep = ':'
+    for (field, arg) in zip(fields, args):
+        ret.append('{0}{1}(std::move({2}))\n'.format(sep, field[1], arg.rstrip('_')))
+        sep = ','
+    ret.append('{}\n')
+    return ret
+
+
 def defineConstructor(classname, fields):
+    if classname == "Block":
+        return defineBlock(classname, fields)
     ret = []
     args = list(map(lambda x: x[1].rstrip('_'), fields))
     ret.append(classname + '(' +
@@ -78,7 +95,7 @@ def defineAST(dir, basename, types):
     lines.append('\n')
     lines.extend(defineVisitor(basename, iter(types)))
     if basename == "Stmt":
-        lines.append('using StatementsList = absl::InlinedVector<std::unique_ptr<lox::Stmt>, 8>;\n\n')
+        lines.append('using StatementsList = absl::InlinedVector<std::shared_ptr<lox::Stmt>, 8>;\n\n')
     for typ in iter(types):
         lines.extend(defineType(basename, typ, types[typ]))
     lines.append('}  // namespace lox\n#endif\n')
@@ -109,6 +126,7 @@ def main():
     stmt_classes = {
         "Block"     : [("StatementsList", "statements_")],
         "Expression": [("std::shared_ptr<Expr>", "expression_")],
+        "If"        : [("std::shared_ptr<Expr>", "condition_"), ("std::shared_ptr<Stmt>", "then_"), ("std::shared_ptr<Stmt>", "else_br_")],
         "Var"       : [("Token", "name_"), ("std::shared_ptr<Expr>", "initialiser_")],
     }
     defineAST(out_dir, "Expr", classes)

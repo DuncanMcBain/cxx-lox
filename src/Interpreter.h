@@ -36,6 +36,7 @@ class Interpreter
 
   void visitBlockStmt(Block &) override;
   void visitExpressionStmt(Expression &) override;
+  void visitIfStmt(If &) override;
   void visitVarStmt(Var &) override;
 
   void interpret(StatementsList &&);

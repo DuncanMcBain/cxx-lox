@@ -79,7 +79,7 @@ ExprResult Interpreter::visitBinaryExpr(Binary &b) {
 }
 
 ExprResult Interpreter::visitTernaryExpr(Ternary &t) {
-  auto cond = std::get<bool>(evaluate(t.cond_));
+  auto cond = isTruthy(evaluate(t.cond_));
   return cond ? evaluate(t.left_) : evaluate(t.right_);
 }
 
@@ -106,6 +106,14 @@ void Interpreter::visitExpressionStmt(Expression &e) {
   fmt::print("{}\n", to_string(evaluate(e.expression_)));
 }
 
+void Interpreter::visitIfStmt(If &i) {
+  if (isTruthy(evaluate(i.condition_))) {
+    execute(*i.then_);
+  } else if (i.else_br_) {
+    execute(*i.else_br_);
+  }
+}
+
 void Interpreter::visitVarStmt(Var &v) {
   env_.define(v.name_.identifier(),
               v.initialiser_ ? evaluate(v.initialiser_) : nullptr);
@@ -116,8 +124,8 @@ void Interpreter::executeBlock(StatementsList &stmts, Environment &env) {
   try {
     env_ = env;
     for (auto &stmt : stmts) {
-      ABSL_ASSERT(stmt.get());
-      execute(*stmt.get());
+      ABSL_ASSERT(stmt);
+      execute(*stmt);
     }
   } catch (...) { ; }
   env = prev;

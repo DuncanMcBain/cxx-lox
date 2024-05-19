@@ -46,7 +46,7 @@ StatementsList Parser::block() {
   return stmts;
 }
 
-std::unique_ptr<Stmt> Parser::declaration() {
+std::shared_ptr<Stmt> Parser::declaration() {
   try {
     if (match({TokenType::VAR})) {
       return var_declaration();
@@ -58,23 +58,32 @@ std::unique_ptr<Stmt> Parser::declaration() {
   }
 }
 
-std::unique_ptr<Stmt> Parser::var_declaration() {
+std::shared_ptr<Stmt> Parser::var_declaration() {
   auto name = consume(TokenType::IDENT, "Expected variable name");
   auto initialiser = match({TokenType::EQ}) ? expression() : nullptr;
   consume(TokenType::SEMICOLON, "Expected ';' after variable declaration");
-  return std::make_unique<Var>(name, initialiser);
+  return std::make_shared<Var>(name, initialiser);
 }
 
-std::unique_ptr<Stmt> Parser::statement() {
-  if (match({TokenType::L_BRACE}))
-    return std::unique_ptr<Block>(new Block(std::move(block())));
+std::shared_ptr<Stmt> Parser::statement() {
+  using enum TokenType;
+  if (match({IF})) {
+    consume(L_PAREN, "Expected '(' after 'if'.");
+    auto cond = expression();
+    consume(R_PAREN, "Expected ')' after if condition.");
+    auto then = statement();
+    auto else_br = match({ELSE}) ? statement() : nullptr;
+    return std::make_shared<If>(cond, then, else_br);
+  }
+  if (match({L_BRACE}))
+    return std::shared_ptr<Block>(new Block(std::move(block())));
   return exprstmt();
 }
 
-std::unique_ptr<Stmt> Parser::exprstmt() {
+std::shared_ptr<Stmt> Parser::exprstmt() {
   auto expr = expression();
   consume(TokenType::SEMICOLON, "Expected `;` after expression");
-  return std::make_unique<Expression>(expr);
+  return std::make_shared<Expression>(expr);
 }
 
 std::shared_ptr<Expr> Parser::expression() { return assignment(); }
