@@ -67,7 +67,6 @@ std::error_code run_prompt(lox::Location &loc) {
 std::error_code run(std::string &&src) {
   lox::Scanner scan(src);
   auto tokens = scan.tokenise();
-  for (auto t : tokens) { fmt::print("token: {}\n", std::string(t)); }
   lox::Parser p(std::move(tokens));
   auto tree = p.parse();
   static lox::Interpreter interpreter;
