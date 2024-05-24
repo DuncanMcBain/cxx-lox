@@ -105,11 +105,31 @@ std::shared_ptr<Expr> Parser::assignment() {
 }
 
 std::shared_ptr<Expr> Parser::comma() {
-  auto expr = ternary();
+  auto expr = or_expr();
   while (match({TokenType::COMMA})) {
     auto op    = prev();
     auto right = equality();
     expr       = std::make_shared<Binary>(expr, right, op);
+  }
+  return expr;
+}
+
+std::shared_ptr<Expr> Parser::or_expr() {
+  auto expr = and_expr();
+  while (match({TokenType::OR})) {
+    auto op = prev();
+    auto right = and_expr();
+    expr = std::make_shared<Logical>(expr, right, op);
+  }
+  return expr;
+}
+
+std::shared_ptr<Expr> Parser::and_expr() {
+  auto expr = ternary();
+  while (match({TokenType::AND})) {
+    auto op = prev();
+    auto right = ternary();
+    expr = std::make_shared<Logical>(expr, right, op);
   }
   return expr;
 }

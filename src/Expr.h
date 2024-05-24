@@ -31,6 +31,7 @@ struct BoolLiteral;
 struct StrLiteral;
 struct NullLiteral;
 struct NumLiteral;
+struct Logical;
 struct Variable;
 struct Unary;
 
@@ -45,6 +46,7 @@ struct Visitor {
   virtual ExprResult visitStrLiteralExpr(StrLiteral &)   = 0;
   virtual ExprResult visitNullLiteralExpr(NullLiteral &) = 0;
   virtual ExprResult visitNumLiteralExpr(NumLiteral &)   = 0;
+  virtual ExprResult visitLogicalExpr(Logical &)         = 0;
   virtual ExprResult visitVariableExpr(Variable &)       = 0;
   virtual ExprResult visitUnaryExpr(Unary &)             = 0;
   virtual ~Visitor()                                     = default;
@@ -130,6 +132,19 @@ struct NumLiteral : Expr {
       : value_(value) {}
   ExprResult accept(expr::Visitor &v) override {
     return v.visitNumLiteralExpr(*this);
+  }
+};
+
+struct Logical : Expr {
+  std::shared_ptr<Expr> left_;
+  std::shared_ptr<Expr> right_;
+  Token op_;
+  Logical(std::shared_ptr<Expr> left, std::shared_ptr<Expr> right, Token op)
+      : left_(left)
+      , right_(right)
+      , op_(op) {}
+  ExprResult accept(expr::Visitor &v) override {
+    return v.visitLogicalExpr(*this);
   }
 };
 

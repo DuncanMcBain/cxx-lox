@@ -78,6 +78,16 @@ ExprResult Interpreter::visitBinaryExpr(Binary &b) {
   }
 }
 
+ExprResult Interpreter::visitLogicalExpr(Logical &l) {
+  auto left = evaluate(l.left_);
+  if (l.op_.type() == TokenType::OR) {
+    if (isTruthy(left)) return left;
+  } else {
+    if (!isTruthy(left)) return left;
+  }
+  return evaluate(l.right_);
+}
+
 ExprResult Interpreter::visitTernaryExpr(Ternary &t) {
   auto cond = isTruthy(evaluate(t.cond_));
   return cond ? evaluate(t.left_) : evaluate(t.right_);

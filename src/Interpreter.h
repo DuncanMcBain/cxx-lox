@@ -30,6 +30,7 @@ class Interpreter
   ExprResult visitGroupExpr(Group &g) override { return evaluate(g.expr_); }
   ExprResult visitAssignExpr(Assign &) override;
   ExprResult visitBinaryExpr(Binary &) override;
+  ExprResult visitLogicalExpr(Logical &) override;
   ExprResult visitTernaryExpr(Ternary &) override;
   ExprResult visitUnaryExpr(Unary &) override;
   ExprResult visitVariableExpr(Variable &) override;

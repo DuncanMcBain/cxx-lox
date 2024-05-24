@@ -18,12 +18,14 @@ class Parser {
   std::vector<Token> tokens_;
   int current_;
 
+  std::shared_ptr<Expr> and_expr();
   std::shared_ptr<Expr> assignment();
   std::shared_ptr<Expr> comma();
   std::shared_ptr<Expr> comparison();
   std::shared_ptr<Expr> equality();
   std::shared_ptr<Expr> expression();
   std::shared_ptr<Expr> factor();
+  std::shared_ptr<Expr> or_expr();
   std::shared_ptr<Expr> primary();
   std::shared_ptr<Expr> term();
   std::shared_ptr<Expr> ternary();

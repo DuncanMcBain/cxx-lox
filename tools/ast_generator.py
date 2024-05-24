@@ -120,6 +120,7 @@ def main():
         "StrLiteral" : [("std::string", "value_")],
         "NullLiteral": [],
         "NumLiteral" : [("double", "value_")],
+        "Logical"    : [("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_"), ("Token", "op_")],
         "Variable"   : [("Token", "name_")],
         "Unary"      : [("std::shared_ptr<Expr>", "right_"), ("Token", "op_")]
     }
