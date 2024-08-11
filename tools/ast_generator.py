@@ -48,7 +48,9 @@ def defineType(basename, classname, fields):
         ret.append('{} {};\n'.format(*field))
     ret.extend(defineConstructor(classname, fields))
     return_type = 'void' if basename == 'Stmt' else 'ExprResult'
-    ret.append('{0} accept({1}::Visitor& v) override'.format(return_type, basename.lower()))
+    ret.append('{0} accept({1}::Visitor<{0}>& v) override'.format(return_type, basename.lower()))
+    ret.append('{{ return v.visit{}{}(*this); }}'.format(classname, basename))
+    ret.append('std::string accept({0}::Visitor<std::string>& v) override'.format(basename.lower()))
     ret.append('{{ return v.visit{}{}(*this); }}'.format(classname, basename))
     ret.append('};\n\n')
     return ret
@@ -57,10 +59,10 @@ def defineType(basename, classname, fields):
 def defineVisitor(basename, types):
     ret = []
     ret.append('namespace {}{{\n\n'.format(basename.lower()))
-    ret.append('struct Visitor {\n')
+    ret.append('template <typename T> struct Visitor {\n')
     return_type = 'void' if basename == 'Stmt' else 'ExprResult'
     for typ in types:
-        ret.append('virtual {2} visit{0}{1}({0}&) = 0;\n'.format(typ, basename, return_type))
+        ret.append('virtual T visit{0}{1}({0}&) = 0;\n'.format(typ, basename))
     ret.append('virtual ~Visitor() = default;')
     ret.append('};\n\n')
     ret.append('}}  // namespace {}\n\n'.format(basename.lower()))
@@ -85,10 +87,12 @@ def defineAST(dir, basename, types):
     if basename == "Expr":
         lines.append('using ExprResult = std::variant<bool, double, std::string, std::nullptr_t>;\n\n')
     lines.append('namespace {} {{\n\n'.format(basename.lower()))
-    lines.append('struct Visitor;\n\n')
+    lines.append('template <typename T> struct Visitor;\n\n')
     lines.append('}}  // namespace {}\n\n'.format(basename.lower()))
-    lines.append('struct {0} {{\nvirtual {1} accept({2}::Visitor&) = 0;\n'.format(
+    lines.append('struct {0} {{\nvirtual {1} accept({2}::Visitor<{1}>&) = 0;\n'.format(
         basename, return_type, basename.lower()))
+    lines.append('virtual {0} accept({1}::Visitor<{0}>&) = 0;\n'.format(
+        'std::string',  basename.lower()))
     lines.append('virtual ~{}() = default;\n}};\n\n'.format(basename))
     for typ in iter(types):
         lines.extend(declareType(basename, typ))

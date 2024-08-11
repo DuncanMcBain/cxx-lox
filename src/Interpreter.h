@@ -13,8 +13,8 @@
 namespace lox {
 
 class Interpreter
-    : public expr::Visitor
-    , stmt::Visitor {
+    : public expr::Visitor<ExprResult>
+    , stmt::Visitor<void> {
   Environment env_;
 
   ExprResult evaluate(std::shared_ptr<Expr>);
