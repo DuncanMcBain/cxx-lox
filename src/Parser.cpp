@@ -1,5 +1,7 @@
+#include "Error.h"
 #include "Parser.h"
 #include "Utils.h"
+
 
 namespace lox {
 
@@ -54,6 +56,7 @@ std::shared_ptr<Stmt> Parser::declaration() {
     return statement();
   } catch (const ParseError &pe) {
     sync();
+    report_error(pe.what(), Location{}.chr(current_));
     return nullptr;
   }
 }
