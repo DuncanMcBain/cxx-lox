@@ -2,6 +2,10 @@
 #include "Expr.h"
 #include "Utils.h"
 
+#include <absl/base/macros.h>
+#include <absl/container/inlined_vector.h>
+#include <absl/strings/string_view.h>
+
 #include <fmt/format.h>
 
 #include <cstddef>
@@ -40,7 +44,9 @@ bool isTruthy(ExprResult obj) {
 
 ExprResult Interpreter::visitAssignExpr(Assign &a) {
   auto val = evaluate(a.val_);
-  env_.assign(a.name_, val);
+  for (auto &e : make_reverse(envs_)) {
+    if (e.assign(a.name_, val)) break;
+  }
   return val;
 }
 
@@ -103,13 +109,15 @@ ExprResult Interpreter::visitUnaryExpr(Unary &u) {
 }
 
 ExprResult Interpreter::visitVariableExpr(Variable &v) {
-  return env_.get(v.name_);
+  for (auto &e : make_reverse(envs_)) {
+    auto res = e.get(v.name_);
+    if (res) return *res;
+  }
+  throw RuntimeError(
+      absl::StrCat("Undefined variable: ", v.name_.identifier()));
 }
 
-void Interpreter::visitBlockStmt(Block &b) {
-  Environment env(&env_);
-  executeBlock(b.statements_, env);
-}
+void Interpreter::visitBlockStmt(Block &b) { executeBlock(b.statements_); }
 
 // TODO: remove the forced print when the print-as-function is implemented
 void Interpreter::visitExpressionStmt(Expression &e) {
@@ -125,20 +133,22 @@ void Interpreter::visitIfStmt(If &i) {
 }
 
 void Interpreter::visitVarStmt(Var &v) {
-  env_.define(v.name_.identifier(),
-              v.initialiser_ ? evaluate(v.initialiser_) : nullptr);
+  cur().define(v.name_.identifier(),
+               v.initialiser_ ? evaluate(v.initialiser_) : nullptr);
 }
 
-void Interpreter::executeBlock(StatementsList &stmts, Environment &env) {
-  auto &prev = env_;
+}
+
+// TODO: fix the catch
+void Interpreter::executeBlock(StatementsList &stmts) {
+  envs_.emplace_back();
   try {
-    env_ = env;
     for (auto &stmt : stmts) {
       ABSL_ASSERT(stmt);
       execute(*stmt);
     }
   } catch (...) { ; }
-  env = prev;
+  envs_.pop_back();
 }
 
 void Interpreter::interpret(StatementsList &&list) {

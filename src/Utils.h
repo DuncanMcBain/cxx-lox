@@ -9,28 +9,21 @@ namespace lox {
 }
 
 template <typename T>
-class Observer {
-  T * t_;
+class Reverse {
+  T &iter_;
 
- public:
-  Observer() : t_{nullptr} {}
+public:
+  explicit Reverse(T &iter)
+      : iter_{iter} {}
 
-  Observer(T * t) : t_{t} {}
-
-  operator bool() {
-    return t_;
-  }
-
-  T operator*() {
-    ABSL_ASSERT(t_ && "Null Observer observed!");
-    return *t_;
-  }
-
-  T* operator->() {
-    ABSL_ASSERT(t_ && "Null Observer called through!");
-    return t_;
-  }
+  auto begin() const { return std::rbegin(iter_); }
+  auto end() const { return std::rend(iter_); }
 };
+
+template <typename T>
+auto make_reverse(T &iter) {
+  return Reverse<T>(iter);
+}
 
 } // namespace lox
 #endif // LOX_UTILS_H_

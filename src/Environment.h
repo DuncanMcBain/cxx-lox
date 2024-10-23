@@ -7,23 +7,18 @@
 
 #include <absl/container/flat_hash_map.h>
 
-namespace lox {
+#include <optional>
 
-// This looks strange but Environments can point to other Environments
-class Environment;
+namespace lox {
 
 class Environment {
   using EnvMap = absl::flat_hash_map<std::string, ExprResult>;
-  Observer<Environment> enclosing_env_;
   EnvMap env_;
 
  public:
-  Environment() = default;
-  Environment(Environment* env) : enclosing_env_{env}, env_{} {}
-  void assign(Token, ExprResult);
+  bool assign(Token, ExprResult);
   void define(absl::string_view, ExprResult);
-
-  ExprResult get(Token);
+  std::optional<ExprResult> get(Token);
 };
 
 } // namespace lox
