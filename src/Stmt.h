@@ -29,6 +29,7 @@ struct Stmt {
 struct Block;
 struct Expression;
 struct If;
+struct While;
 struct Var;
 
 namespace stmt {
@@ -38,6 +39,7 @@ struct Visitor {
   virtual T visitBlockStmt(Block &)           = 0;
   virtual T visitExpressionStmt(Expression &) = 0;
   virtual T visitIfStmt(If &)                 = 0;
+  virtual T visitWhileStmt(While &)           = 0;
   virtual T visitVarStmt(Var &)               = 0;
   virtual ~Visitor()                          = default;
 };
@@ -82,6 +84,20 @@ struct If : Stmt {
   void accept(stmt::Visitor<void> &v) override { return v.visitIfStmt(*this); }
   std::string accept(stmt::Visitor<std::string> &v) override {
     return v.visitIfStmt(*this);
+  }
+};
+
+struct While : Stmt {
+  std::shared_ptr<Expr> condition_;
+  std::shared_ptr<Stmt> body_;
+  While(std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> body)
+      : condition_(condition)
+      , body_(body) {}
+  void accept(stmt::Visitor<void> &v) override {
+    return v.visitWhileStmt(*this);
+  }
+  std::string accept(stmt::Visitor<std::string> &v) override {
+    return v.visitWhileStmt(*this);
   }
 };
 

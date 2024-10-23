@@ -137,6 +137,8 @@ void Interpreter::visitVarStmt(Var &v) {
                v.initialiser_ ? evaluate(v.initialiser_) : nullptr);
 }
 
+void Interpreter::visitWhileStmt(While &w) {
+  while (isTruthy(evaluate(w.condition_))) { execute(*w.body_); }
 }
 
 // TODO: fix the catch

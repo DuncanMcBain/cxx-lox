@@ -43,6 +43,7 @@ class Interpreter
   void visitExpressionStmt(Expression &) override;
   void visitIfStmt(If &) override;
   void visitVarStmt(Var &) override;
+  void visitWhileStmt(While &) override;
 
  public:
   void interpret(StatementsList &&);

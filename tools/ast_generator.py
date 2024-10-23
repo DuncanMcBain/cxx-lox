@@ -132,6 +132,7 @@ def main():
         "Block"     : [("StatementsList", "statements_")],
         "Expression": [("std::shared_ptr<Expr>", "expression_")],
         "If"        : [("std::shared_ptr<Expr>", "condition_"), ("std::shared_ptr<Stmt>", "then_"), ("std::shared_ptr<Stmt>", "else_br_")],
+        "While"     : [("std::shared_ptr<Expr>", "condition_"), ("std::shared_ptr<Stmt>", "body_")],
         "Var"       : [("Token", "name_"), ("std::shared_ptr<Expr>", "initialiser_")],
     }
     defineAST(out_dir, "Expr", classes)

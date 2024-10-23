@@ -36,6 +36,7 @@ class Parser {
   std::shared_ptr<Stmt> exprstmt();
   std::shared_ptr<Stmt> statement();
   std::shared_ptr<Stmt> var_declaration();
+  std::shared_ptr<Stmt> while_stmt();
 
   const Token &consume(TokenType, absl::string_view);
   bool match(const TokenTypeList &);

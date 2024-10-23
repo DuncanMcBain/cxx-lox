@@ -8,10 +8,10 @@
 #include <fmt/core.h>
 
 // TODO: replace this?
-#include <iostream>
-#include <string>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
+#include <string>
 
 #include <sysexits.h>
 

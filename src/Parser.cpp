@@ -2,7 +2,6 @@
 #include "Parser.h"
 #include "Utils.h"
 
-
 namespace lox {
 
 bool Parser::match(const TokenTypeList &types) {
@@ -50,9 +49,7 @@ StatementsList Parser::block() {
 
 std::shared_ptr<Stmt> Parser::declaration() {
   try {
-    if (match({TokenType::VAR})) {
-      return var_declaration();
-    }
+    if (match({TokenType::VAR})) { return var_declaration(); }
     return statement();
   } catch (const ParseError &pe) {
     sync();
@@ -62,7 +59,7 @@ std::shared_ptr<Stmt> Parser::declaration() {
 }
 
 std::shared_ptr<Stmt> Parser::var_declaration() {
-  auto name = consume(TokenType::IDENT, "Expected variable name");
+  auto name        = consume(TokenType::IDENT, "Expected variable name");
   auto initialiser = match({TokenType::EQ}) ? expression() : nullptr;
   consume(TokenType::SEMICOLON, "Expected ';' after variable declaration");
   return std::make_shared<Var>(name, initialiser);
@@ -74,13 +71,22 @@ std::shared_ptr<Stmt> Parser::statement() {
     consume(L_PAREN, "Expected '(' after 'if'.");
     auto cond = expression();
     consume(R_PAREN, "Expected ')' after if condition.");
-    auto then = statement();
+    auto then    = statement();
     auto else_br = match({ELSE}) ? statement() : nullptr;
     return std::make_shared<If>(cond, then, else_br);
   }
+  if (match({WHILE})) return while_stmt();
   if (match({L_BRACE}))
     return std::shared_ptr<Block>(new Block(std::move(block())));
   return exprstmt();
+}
+
+std::shared_ptr<Stmt> Parser::while_stmt() {
+  consume(TokenType::L_PAREN, "Expected '(' after 'while'.");
+  auto cond = expression();
+  consume(TokenType::R_PAREN, "Expected ')' after while condition.");
+  auto body = statement();
+  return std::make_shared<While>(cond, body);
 }
 
 std::shared_ptr<Stmt> Parser::exprstmt() {
@@ -95,10 +101,10 @@ std::shared_ptr<Expr> Parser::assignment() {
   auto expr = comma();
 
   if (match({TokenType::EQ})) {
-    auto eq = prev();
+    auto eq  = prev();
     auto val = assignment();
 
-    if (auto var = dynamic_cast<Variable*>(expr.get())) {
+    if (auto var = dynamic_cast<Variable *>(expr.get())) {
       auto name = var->name_;
       return std::make_shared<Assign>(name, val);
     }
@@ -120,9 +126,9 @@ std::shared_ptr<Expr> Parser::comma() {
 std::shared_ptr<Expr> Parser::or_expr() {
   auto expr = and_expr();
   while (match({TokenType::OR})) {
-    auto op = prev();
+    auto op    = prev();
     auto right = and_expr();
-    expr = std::make_shared<Logical>(expr, right, op);
+    expr       = std::make_shared<Logical>(expr, right, op);
   }
   return expr;
 }
@@ -130,9 +136,9 @@ std::shared_ptr<Expr> Parser::or_expr() {
 std::shared_ptr<Expr> Parser::and_expr() {
   auto expr = ternary();
   while (match({TokenType::AND})) {
-    auto op = prev();
+    auto op    = prev();
     auto right = ternary();
-    expr = std::make_shared<Logical>(expr, right, op);
+    expr       = std::make_shared<Logical>(expr, right, op);
   }
   return expr;
 }
@@ -208,7 +214,9 @@ std::shared_ptr<Expr> Parser::primary() {
   if (match({NUMBER})) { return std::make_shared<NumLiteral>(prev().number()); }
   // TODO: change this to clarify ownership, what will live longest? Probably
   // the expression node so string should live in it, views everywhere else
-  if (match({STRING})) { return std::make_shared<StrLiteral>(std::string(prev().string())); }
+  if (match({STRING})) {
+    return std::make_shared<StrLiteral>(std::string(prev().string()));
+  }
 
   if (match({IDENT})) { return std::make_shared<Variable>(prev()); }
 
