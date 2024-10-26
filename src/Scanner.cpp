@@ -91,7 +91,7 @@ void Scanner::scan_token() {
   case ' ':
   case '\t':
   case '\r': break;
-  case '\n': line_++;
+  case '\n': line_++; break;
   case '"': consume_string(); break;
   default:
     if (absl::ascii_isdigit(chr)) {
