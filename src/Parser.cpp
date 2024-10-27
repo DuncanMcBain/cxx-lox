@@ -1,6 +1,8 @@
-#include "Parser.h"
 #include "Error.h"
+#include "Parser.h"
 #include "Utils.h"
+
+#include <initializer_list>
 
 namespace lox {
 
@@ -67,6 +69,7 @@ StmtPtr Parser::var_declaration() {
 
 StmtPtr Parser::statement() {
   using enum TokenType;
+  if (match({FOR})) return for_stmt();
   if (match({IF})) {
     consume(L_PAREN, "Expected '(' after 'if'.");
     auto cond = expression();
@@ -79,6 +82,38 @@ StmtPtr Parser::statement() {
   if (match({L_BRACE}))
     return std::shared_ptr<Block>(new Block(std::move(block())));
   return exprstmt();
+}
+
+StmtPtr Parser::for_stmt() {
+  using enum TokenType;
+  consume(L_PAREN, "Expected '(' after 'for'");
+
+  StmtPtr init = nullptr;
+  if (match({SEMICOLON})) {
+    // nothing happens, there's no intialiser
+  } else if (match({VAR})) {
+    init = var_declaration();
+  } else {
+    init = exprstmt();
+  }
+
+  ExprPtr condition = nullptr;
+  if (!check(SEMICOLON)) condition = expression();
+  consume(SEMICOLON, "Expected ';' after loop condition.");
+
+  ExprPtr increment = nullptr;
+  if (!check(R_PAREN)) increment = expression();
+  consume(R_PAREN, "Expected ')' after for loop clauses.");
+  StmtPtr body = statement();
+
+  if (increment) {
+    body = std::make_shared<Block>(StatementsList({body, std::make_shared<Expression>(increment)}));
+  }
+  if (!condition) condition = std::make_shared<BoolLiteral>(true);
+  body = std::make_shared<While>(condition, body);
+  if (init) body = std::make_shared<Block>(StatementsList({init, body}));
+
+  return body;
 }
 
 StmtPtr Parser::while_stmt() {

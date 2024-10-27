@@ -34,6 +34,7 @@ class Parser {
   StmtPtr declaration();
   StatementsList block();
   StmtPtr exprstmt();
+  StmtPtr for_stmt();
   StmtPtr statement();
   StmtPtr var_declaration();
   StmtPtr while_stmt();
