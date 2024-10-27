@@ -1,5 +1,5 @@
-#include "Error.h"
 #include "Parser.h"
+#include "Error.h"
 #include "Utils.h"
 
 namespace lox {
@@ -47,7 +47,7 @@ StatementsList Parser::block() {
   return stmts;
 }
 
-std::shared_ptr<Stmt> Parser::declaration() {
+StmtPtr Parser::declaration() {
   try {
     if (match({TokenType::VAR})) { return var_declaration(); }
     return statement();
@@ -58,14 +58,14 @@ std::shared_ptr<Stmt> Parser::declaration() {
   }
 }
 
-std::shared_ptr<Stmt> Parser::var_declaration() {
+StmtPtr Parser::var_declaration() {
   auto name        = consume(TokenType::IDENT, "Expected variable name");
   auto initialiser = match({TokenType::EQ}) ? expression() : nullptr;
   consume(TokenType::SEMICOLON, "Expected ';' after variable declaration");
   return std::make_shared<Var>(name, initialiser);
 }
 
-std::shared_ptr<Stmt> Parser::statement() {
+StmtPtr Parser::statement() {
   using enum TokenType;
   if (match({IF})) {
     consume(L_PAREN, "Expected '(' after 'if'.");
@@ -81,7 +81,7 @@ std::shared_ptr<Stmt> Parser::statement() {
   return exprstmt();
 }
 
-std::shared_ptr<Stmt> Parser::while_stmt() {
+StmtPtr Parser::while_stmt() {
   consume(TokenType::L_PAREN, "Expected '(' after 'while'.");
   auto cond = expression();
   consume(TokenType::R_PAREN, "Expected ')' after while condition.");
@@ -89,15 +89,15 @@ std::shared_ptr<Stmt> Parser::while_stmt() {
   return std::make_shared<While>(cond, body);
 }
 
-std::shared_ptr<Stmt> Parser::exprstmt() {
+StmtPtr Parser::exprstmt() {
   auto expr = expression();
   consume(TokenType::SEMICOLON, "Expected `;` after expression");
   return std::make_shared<Expression>(expr);
 }
 
-std::shared_ptr<Expr> Parser::expression() { return assignment(); }
+ExprPtr Parser::expression() { return assignment(); }
 
-std::shared_ptr<Expr> Parser::assignment() {
+ExprPtr Parser::assignment() {
   auto expr = comma();
 
   if (match({TokenType::EQ})) {
@@ -113,7 +113,7 @@ std::shared_ptr<Expr> Parser::assignment() {
   return expr;
 }
 
-std::shared_ptr<Expr> Parser::comma() {
+ExprPtr Parser::comma() {
   auto expr = or_expr();
   while (match({TokenType::COMMA})) {
     auto op    = prev();
@@ -123,7 +123,7 @@ std::shared_ptr<Expr> Parser::comma() {
   return expr;
 }
 
-std::shared_ptr<Expr> Parser::or_expr() {
+ExprPtr Parser::or_expr() {
   auto expr = and_expr();
   while (match({TokenType::OR})) {
     auto op    = prev();
@@ -133,7 +133,7 @@ std::shared_ptr<Expr> Parser::or_expr() {
   return expr;
 }
 
-std::shared_ptr<Expr> Parser::and_expr() {
+ExprPtr Parser::and_expr() {
   auto expr = ternary();
   while (match({TokenType::AND})) {
     auto op    = prev();
@@ -143,7 +143,7 @@ std::shared_ptr<Expr> Parser::and_expr() {
   return expr;
 }
 
-std::shared_ptr<Expr> Parser::ternary() {
+ExprPtr Parser::ternary() {
   using enum TokenType;
   auto cond = equality();
   if (match({QUESTION})) {
@@ -156,7 +156,7 @@ std::shared_ptr<Expr> Parser::ternary() {
 }
 
 // TODO: make these all one instance of a template somehow? Or preprocessor?
-std::shared_ptr<Expr> Parser::equality() {
+ExprPtr Parser::equality() {
   auto expr = comparison();
   while (match({TokenType::BANG_EQ, TokenType::EQ_EQ})) {
     auto op    = prev();
@@ -166,7 +166,7 @@ std::shared_ptr<Expr> Parser::equality() {
   return expr;
 }
 
-std::shared_ptr<Expr> Parser::comparison() {
+ExprPtr Parser::comparison() {
   using enum TokenType;
   auto expr = term();
   while (match({GTR, GTR_EQ, LESS, LESS_EQ})) {
@@ -177,7 +177,7 @@ std::shared_ptr<Expr> Parser::comparison() {
   return expr;
 }
 
-std::shared_ptr<Expr> Parser::term() {
+ExprPtr Parser::term() {
   auto expr = factor();
   while (match({TokenType::MINUS, TokenType::PLUS})) {
     auto op    = prev();
@@ -187,7 +187,7 @@ std::shared_ptr<Expr> Parser::term() {
   return expr;
 }
 
-std::shared_ptr<Expr> Parser::factor() {
+ExprPtr Parser::factor() {
   auto expr = unary();
   while (match({TokenType::SLASH, TokenType::STAR})) {
     auto op    = prev();
@@ -197,7 +197,7 @@ std::shared_ptr<Expr> Parser::factor() {
   return expr;
 }
 
-std::shared_ptr<Expr> Parser::unary() {
+ExprPtr Parser::unary() {
   if (match({TokenType::BANG, TokenType::MINUS})) {
     auto op    = prev();
     auto right = unary();
@@ -206,7 +206,7 @@ std::shared_ptr<Expr> Parser::unary() {
   return primary();
 }
 
-std::shared_ptr<Expr> Parser::primary() {
+ExprPtr Parser::primary() {
   using enum TokenType;
   if (match({FALSE})) { return std::make_shared<BoolLiteral>(false); }
   if (match({TRUE})) { return std::make_shared<BoolLiteral>(true); }

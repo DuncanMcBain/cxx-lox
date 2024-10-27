@@ -57,10 +57,11 @@ struct Visitor {
 
 } // namespace expr
 
+using ExprPtr = std::shared_ptr<Expr>;
 struct Assign : Expr {
   Token name_;
-  std::shared_ptr<Expr> val_;
-  Assign(Token name, std::shared_ptr<Expr> val)
+  ExprPtr val_;
+  Assign(Token name, ExprPtr val)
       : name_(name)
       , val_(val) {}
   ExprResult accept(expr::Visitor<ExprResult> &v) override {
@@ -72,10 +73,10 @@ struct Assign : Expr {
 };
 
 struct Binary : Expr {
-  std::shared_ptr<Expr> left_;
-  std::shared_ptr<Expr> right_;
+  ExprPtr left_;
+  ExprPtr right_;
   Token op_;
-  Binary(std::shared_ptr<Expr> left, std::shared_ptr<Expr> right, Token op)
+  Binary(ExprPtr left, ExprPtr right, Token op)
       : left_(left)
       , right_(right)
       , op_(op) {}
@@ -88,11 +89,10 @@ struct Binary : Expr {
 };
 
 struct Ternary : Expr {
-  std::shared_ptr<Expr> cond_;
-  std::shared_ptr<Expr> left_;
-  std::shared_ptr<Expr> right_;
-  Ternary(std::shared_ptr<Expr> cond, std::shared_ptr<Expr> left,
-          std::shared_ptr<Expr> right)
+  ExprPtr cond_;
+  ExprPtr left_;
+  ExprPtr right_;
+  Ternary(ExprPtr cond, ExprPtr left, ExprPtr right)
       : cond_(cond)
       , left_(left)
       , right_(right) {}
@@ -105,8 +105,8 @@ struct Ternary : Expr {
 };
 
 struct Group : Expr {
-  std::shared_ptr<Expr> expr_;
-  Group(std::shared_ptr<Expr> expr)
+  ExprPtr expr_;
+  Group(ExprPtr expr)
       : expr_(expr) {}
   ExprResult accept(expr::Visitor<ExprResult> &v) override {
     return v.visitGroupExpr(*this);
@@ -163,10 +163,10 @@ struct NumLiteral : Expr {
 };
 
 struct Logical : Expr {
-  std::shared_ptr<Expr> left_;
-  std::shared_ptr<Expr> right_;
+  ExprPtr left_;
+  ExprPtr right_;
   Token op_;
-  Logical(std::shared_ptr<Expr> left, std::shared_ptr<Expr> right, Token op)
+  Logical(ExprPtr left, ExprPtr right, Token op)
       : left_(left)
       , right_(right)
       , op_(op) {}
@@ -191,9 +191,9 @@ struct Variable : Expr {
 };
 
 struct Unary : Expr {
-  std::shared_ptr<Expr> right_;
+  ExprPtr right_;
   Token op_;
-  Unary(std::shared_ptr<Expr> right, Token op)
+  Unary(ExprPtr right, Token op)
       : right_(right)
       , op_(op) {}
   ExprResult accept(expr::Visitor<ExprResult> &v) override {

@@ -20,9 +20,7 @@ Overloaded(Ts...) -> Overloaded<Ts...>;
 
 namespace lox {
 
-ExprResult Interpreter::evaluate(std::shared_ptr<Expr> expr) {
-  return expr->accept(*this);
-}
+ExprResult Interpreter::evaluate(ExprPtr expr) { return expr->accept(*this); }
 
 bool isEqual(ExprResult l, ExprResult r) {
   auto visitor = Overloaded{[](bool a, bool b) { return a == b; },

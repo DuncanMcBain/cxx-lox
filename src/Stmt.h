@@ -46,6 +46,7 @@ struct Visitor {
 
 } // namespace stmt
 
+using StmtPtr        = std::shared_ptr<Stmt>;
 using StatementsList = absl::InlinedVector<std::shared_ptr<lox::Stmt>, 8>;
 
 struct Block : Stmt {
@@ -61,8 +62,8 @@ struct Block : Stmt {
 };
 
 struct Expression : Stmt {
-  std::shared_ptr<Expr> expression_;
-  Expression(std::shared_ptr<Expr> expression)
+  ExprPtr expression_;
+  Expression(ExprPtr expression)
       : expression_(expression) {}
   void accept(stmt::Visitor<void> &v) override {
     return v.visitExpressionStmt(*this);
@@ -73,11 +74,10 @@ struct Expression : Stmt {
 };
 
 struct If : Stmt {
-  std::shared_ptr<Expr> condition_;
-  std::shared_ptr<Stmt> then_;
-  std::shared_ptr<Stmt> else_br_;
-  If(std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> then,
-     std::shared_ptr<Stmt> else_br)
+  ExprPtr condition_;
+  StmtPtr then_;
+  StmtPtr else_br_;
+  If(ExprPtr condition, StmtPtr then, StmtPtr else_br)
       : condition_(condition)
       , then_(then)
       , else_br_(else_br) {}
@@ -88,9 +88,9 @@ struct If : Stmt {
 };
 
 struct While : Stmt {
-  std::shared_ptr<Expr> condition_;
-  std::shared_ptr<Stmt> body_;
-  While(std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> body)
+  ExprPtr condition_;
+  StmtPtr body_;
+  While(ExprPtr condition, StmtPtr body)
       : condition_(condition)
       , body_(body) {}
   void accept(stmt::Visitor<void> &v) override {
@@ -103,8 +103,8 @@ struct While : Stmt {
 
 struct Var : Stmt {
   Token name_;
-  std::shared_ptr<Expr> initialiser_;
-  Var(Token name, std::shared_ptr<Expr> initialiser)
+  ExprPtr initialiser_;
+  Var(Token name, ExprPtr initialiser)
       : name_(name)
       , initialiser_(initialiser) {}
   void accept(stmt::Visitor<void> &v) override { return v.visitVarStmt(*this); }

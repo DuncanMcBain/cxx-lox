@@ -98,6 +98,7 @@ def defineAST(dir, basename, types):
         lines.extend(declareType(basename, typ))
     lines.append('\n')
     lines.extend(defineVisitor(basename, iter(types)))
+    lines.append('using {0}Ptr = std::shared_ptr<{0}>;'.format(basename))
     if basename == "Stmt":
         lines.append('using StatementsList = absl::InlinedVector<std::shared_ptr<lox::Stmt>, 8>;\n\n')
     for typ in iter(types):
@@ -116,24 +117,24 @@ def main():
         return 1
     out_dir = sys.argv[1]
     classes = {
-        "Assign"     : [("Token", "name_"), ("std::shared_ptr<Expr>", "val_")],
-        "Binary"     : [("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_"), ("Token", "op_")],
-        "Ternary"    : [("std::shared_ptr<Expr>", "cond_"), ("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_")],
-        "Group"      : [("std::shared_ptr<Expr>", "expr_")],
+        "Assign"     : [("Token", "name_"), ("ExprPtr", "val_")],
+        "Binary"     : [("ExprPtr", "left_"), ("ExprPtr", "right_"), ("Token", "op_")],
+        "Ternary"    : [("ExprPtr", "cond_"), ("ExprPtr", "left_"), ("ExprPtr", "right_")],
+        "Group"      : [("ExprPtr", "expr_")],
         "BoolLiteral": [("bool", "value_")],
         "StrLiteral" : [("std::string", "value_")],
         "NullLiteral": [],
         "NumLiteral" : [("double", "value_")],
-        "Logical"    : [("std::shared_ptr<Expr>", "left_"), ("std::shared_ptr<Expr>", "right_"), ("Token", "op_")],
+        "Logical"    : [("ExprPtr", "left_"), ("ExprPtr", "right_"), ("Token", "op_")],
         "Variable"   : [("Token", "name_")],
-        "Unary"      : [("std::shared_ptr<Expr>", "right_"), ("Token", "op_")]
+        "Unary"      : [("ExprPtr", "right_"), ("Token", "op_")]
     }
     stmt_classes = {
         "Block"     : [("StatementsList", "statements_")],
-        "Expression": [("std::shared_ptr<Expr>", "expression_")],
-        "If"        : [("std::shared_ptr<Expr>", "condition_"), ("std::shared_ptr<Stmt>", "then_"), ("std::shared_ptr<Stmt>", "else_br_")],
-        "While"     : [("std::shared_ptr<Expr>", "condition_"), ("std::shared_ptr<Stmt>", "body_")],
-        "Var"       : [("Token", "name_"), ("std::shared_ptr<Expr>", "initialiser_")],
+        "Expression": [("ExprPtr", "expression_")],
+        "If"        : [("ExprPtr", "condition_"), ("StmtPtr", "then_"), ("StmtPtr", "else_br_")],
+        "While"     : [("ExprPtr", "condition_"), ("StmtPtr", "body_")],
+        "Var"       : [("Token", "name_"), ("ExprPtr", "initialiser_")],
     }
     defineAST(out_dir, "Expr", classes)
     defineAST(out_dir, "Stmt", stmt_classes)

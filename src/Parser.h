@@ -12,31 +12,31 @@
 
 namespace lox {
 
-using TokenTypeList  = absl::InlinedVector<lox::TokenType, 4>;
+using TokenTypeList = absl::InlinedVector<lox::TokenType, 4>;
 
 class Parser {
   std::vector<Token> tokens_;
   int current_;
 
-  std::shared_ptr<Expr> and_expr();
-  std::shared_ptr<Expr> assignment();
-  std::shared_ptr<Expr> comma();
-  std::shared_ptr<Expr> comparison();
-  std::shared_ptr<Expr> equality();
-  std::shared_ptr<Expr> expression();
-  std::shared_ptr<Expr> factor();
-  std::shared_ptr<Expr> or_expr();
-  std::shared_ptr<Expr> primary();
-  std::shared_ptr<Expr> term();
-  std::shared_ptr<Expr> ternary();
-  std::shared_ptr<Expr> unary();
+  ExprPtr and_expr();
+  ExprPtr assignment();
+  ExprPtr comma();
+  ExprPtr comparison();
+  ExprPtr equality();
+  ExprPtr expression();
+  ExprPtr factor();
+  ExprPtr or_expr();
+  ExprPtr primary();
+  ExprPtr term();
+  ExprPtr ternary();
+  ExprPtr unary();
 
-  std::shared_ptr<Stmt> declaration();
-  StatementsList        block();
-  std::shared_ptr<Stmt> exprstmt();
-  std::shared_ptr<Stmt> statement();
-  std::shared_ptr<Stmt> var_declaration();
-  std::shared_ptr<Stmt> while_stmt();
+  StmtPtr declaration();
+  StatementsList block();
+  StmtPtr exprstmt();
+  StmtPtr statement();
+  StmtPtr var_declaration();
+  StmtPtr while_stmt();
 
   const Token &consume(TokenType, absl::string_view);
   bool match(const TokenTypeList &);
@@ -67,8 +67,7 @@ class Parser {
     StatementsList statements;
     while (!at_end()) {
       auto decl = declaration();
-      if (decl)
-        statements.push_back(std::move(decl));
+      if (decl) statements.push_back(std::move(decl));
     }
     return statements;
   }

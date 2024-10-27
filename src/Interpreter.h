@@ -17,14 +17,14 @@ class Interpreter
   using EnvironmentStack = absl::InlinedVector<Environment, 8>;
   EnvironmentStack envs_ = EnvironmentStack{{}};
 
-  Environment& cur() {
+  Environment &cur() {
     ABSL_ASSERT(envs_.size() > 0);
     return *(envs_.end() - 1);
   }
 
-  ExprResult evaluate(std::shared_ptr<Expr>);
+  ExprResult evaluate(ExprPtr);
   void execute(Stmt &stmt) { stmt.accept(*this); }
-  void executeBlock(StatementsList&);
+  void executeBlock(StatementsList &);
   std::string to_string(ExprResult);
 
   ExprResult visitBoolLiteralExpr(BoolLiteral &b) override { return b.value_; }
