@@ -1,6 +1,8 @@
-#include "Error.h"
 #include "Parser.h"
+#include "Error.h"
 #include "Utils.h"
+
+#include <fmt/format.h>
 
 #include <initializer_list>
 
@@ -31,7 +33,6 @@ void Parser::sync() {
     case FOR:
     case FUN:
     case IF:
-    case PRINT:
     case RETURN:
     case VAR:
     case WHILE: return;
@@ -51,6 +52,7 @@ StatementsList Parser::block() {
 
 StmtPtr Parser::declaration() {
   try {
+    if (match({TokenType::FUN})) { return function(FunctionKind::FUNC); }
     if (match({TokenType::VAR})) { return var_declaration(); }
     return statement();
   } catch (const ParseError &pe) {
@@ -107,13 +109,47 @@ StmtPtr Parser::for_stmt() {
   StmtPtr body = statement();
 
   if (increment) {
-    body = std::make_shared<Block>(StatementsList({body, std::make_shared<Expression>(increment)}));
+    body = std::make_shared<Block>(
+        StatementsList({body, std::make_shared<Expression>(increment)}));
   }
   if (!condition) condition = std::make_shared<BoolLiteral>(true);
   body = std::make_shared<While>(condition, body);
   if (init) body = std::make_shared<Block>(StatementsList({init, body}));
 
   return body;
+}
+
+StmtPtr Parser::function(FunctionKind kind) {
+  using enum TokenType;
+  auto str = [](FunctionKind k) {
+    using enum FunctionKind;
+    switch (k) {
+    case FUNC: return "function";
+    case METHOD: return "class method";
+    default: return "unknown function kind";
+    }
+  };
+  auto kind_str = str(kind);
+  auto name     = consume(IDENT, fmt::format("Expected {} name.", kind_str));
+  auto name_str = name.identifier();
+  consume(L_PAREN, fmt::format("Expected '(' after {} identifier (name {}).",
+                               kind_str, name_str));
+  TokensList params;
+  if (!check(R_PAREN)) {
+    do {
+      if (params.size() >= 255)
+        report_error("Exceeded maximum parameter count of 254", Location{});
+      params.push_back(
+          consume(IDENT, fmt::format("Expected parameter name in {} {}.",
+                                     kind_str, name_str)));
+    } while (match({COMMA}));
+  }
+  consume(R_PAREN,
+          fmt::format("Expected ')' after {} parameter list.", name_str));
+  consume(L_BRACE,
+          fmt::format("Expected '{{' before {} {} body.", kind_str, name_str));
+  auto body = block();
+  return std::make_shared<Fn>(name, params, body);
 }
 
 StmtPtr Parser::while_stmt() {
@@ -150,7 +186,8 @@ ExprPtr Parser::assignment() {
 
 ExprPtr Parser::comma() {
   auto expr = or_expr();
-  while (match({TokenType::COMMA})) {
+  // Use short-circuit evaluation so we don't eat the comma
+  while (!parsing_args_ && match({TokenType::COMMA})) {
     auto op    = prev();
     auto right = equality();
     expr       = std::make_shared<Binary>(expr, right, op);
@@ -238,7 +275,39 @@ ExprPtr Parser::unary() {
     auto right = unary();
     return std::make_shared<Unary>(right, op);
   }
-  return primary();
+  return call();
+}
+
+ExprPtr Parser::call() {
+  ExprPtr expr = primary();
+
+  auto get_args = [this](ExprPtr callee) {
+    using enum TokenType;
+    ExpressionsList args;
+    bool already_reported = false;
+    parsing_args_         = true;
+    if (!check(R_PAREN)) {
+      do {
+        if (args.size() >= 255 && !already_reported) {
+          report_error("Functions must not exceed 255 arguments.", Location{});
+          already_reported = true;
+        }
+        args.push_back(expression());
+      } while (match({COMMA}));
+    }
+    parsing_args_ = false;
+    auto paren    = consume(R_PAREN, "Expected ')' after argument list.");
+    return std::make_shared<Call>(callee, paren, args);
+  };
+
+  while (true) {
+    if (match({TokenType::L_PAREN})) {
+      expr = get_args(expr);
+    } else {
+      break;
+    }
+  }
+  return expr;
 }
 
 ExprPtr Parser::primary() {

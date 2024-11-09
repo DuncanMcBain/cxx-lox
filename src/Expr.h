@@ -3,6 +3,8 @@
 
 #include "Token.h"
 
+#include <absl/container/inlined_vector.h>
+
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -10,7 +12,11 @@
 
 namespace lox {
 
-using ExprResult = std::variant<bool, double, std::string, std::nullptr_t>;
+class Callable;
+using CallablePtr = std::shared_ptr<Callable>;
+
+using ExprResult =
+    std::variant<bool, double, std::string, std::nullptr_t, CallablePtr>;
 
 namespace expr {
 
@@ -28,6 +34,7 @@ struct Expr {
 struct Assign;
 struct Binary;
 struct Ternary;
+struct Call;
 struct Group;
 struct BoolLiteral;
 struct StrLiteral;
@@ -44,6 +51,7 @@ struct Visitor {
   virtual T visitAssignExpr(Assign &)           = 0;
   virtual T visitBinaryExpr(Binary &)           = 0;
   virtual T visitTernaryExpr(Ternary &)         = 0;
+  virtual T visitCallExpr(Call &)               = 0;
   virtual T visitGroupExpr(Group &)             = 0;
   virtual T visitBoolLiteralExpr(BoolLiteral &) = 0;
   virtual T visitStrLiteralExpr(StrLiteral &)   = 0;
@@ -57,7 +65,9 @@ struct Visitor {
 
 } // namespace expr
 
-using ExprPtr = std::shared_ptr<Expr>;
+using ExprPtr         = std::shared_ptr<Expr>;
+using ExpressionsList = absl::InlinedVector<std::shared_ptr<lox::Expr>, 8>;
+
 struct Assign : Expr {
   Token name_;
   ExprPtr val_;
@@ -101,6 +111,22 @@ struct Ternary : Expr {
   }
   std::string accept(expr::Visitor<std::string> &v) override {
     return v.visitTernaryExpr(*this);
+  }
+};
+
+struct Call : Expr {
+  ExprPtr callee_;
+  Token paren_;
+  ExpressionsList args_;
+  Call(ExprPtr callee, Token paren, ExpressionsList args)
+      : callee_(callee)
+      , paren_(paren)
+      , args_(args) {}
+  ExprResult accept(expr::Visitor<ExprResult> &v) override {
+    return v.visitCallExpr(*this);
+  }
+  std::string accept(expr::Visitor<std::string> &v) override {
+    return v.visitCallExpr(*this);
   }
 };
 

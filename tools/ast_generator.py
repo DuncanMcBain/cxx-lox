@@ -77,15 +77,16 @@ def defineAST(dir, basename, types):
     if not basename == "Expr":
         lines.append('#include "Expr.h"\n')
     lines.append('#include "Token.h"\n\n')
-    if basename == 'Stmt':
-        lines.append('#include <absl/container/inlined_vector.h>\n\n')
+    lines.append('#include <absl/container/inlined_vector.h>\n\n')
     lines.append('#include <cstddef>\n')
     lines.append('#include <memory>\n')
     lines.append('#include <string>\n')
     lines.append('#include <variant>\n\n')
     lines.append('namespace lox {\n\n')
     if basename == "Expr":
-        lines.append('using ExprResult = std::variant<bool, double, std::string, std::nullptr_t>;\n\n')
+        lines.append('class Callable;\n')
+        lines.append('using CallablePtr = std::shared_ptr<Callable>;\n\n')
+        lines.append('using ExprResult = std::variant<bool, double, std::string, std::nullptr_t, CallablePtr>;\n\n')
     lines.append('namespace {} {{\n\n'.format(basename.lower()))
     lines.append('template <typename T> struct Visitor;\n\n')
     lines.append('}}  // namespace {}\n\n'.format(basename.lower()))
@@ -101,6 +102,9 @@ def defineAST(dir, basename, types):
     lines.append('using {0}Ptr = std::shared_ptr<{0}>;'.format(basename))
     if basename == "Stmt":
         lines.append('using StatementsList = absl::InlinedVector<std::shared_ptr<lox::Stmt>, 8>;\n\n')
+        lines.append('using TokensList = absl::InlinedVector<Token, 8>;\n\n')
+    if basename == "Expr":
+        lines.append('using ExpressionsList = absl::InlinedVector<std::shared_ptr<lox::Expr>, 8>;\n\n')
     for typ in iter(types):
         lines.extend(defineType(basename, typ, types[typ]))
     lines.append('}  // namespace lox\n#endif\n')
@@ -120,6 +124,7 @@ def main():
         "Assign"     : [("Token", "name_"), ("ExprPtr", "val_")],
         "Binary"     : [("ExprPtr", "left_"), ("ExprPtr", "right_"), ("Token", "op_")],
         "Ternary"    : [("ExprPtr", "cond_"), ("ExprPtr", "left_"), ("ExprPtr", "right_")],
+        "Call"       : [("ExprPtr", "callee_"), ("Token", "paren_"), ("ExpressionsList", "args_")],
         "Group"      : [("ExprPtr", "expr_")],
         "BoolLiteral": [("bool", "value_")],
         "StrLiteral" : [("std::string", "value_")],
@@ -132,6 +137,7 @@ def main():
     stmt_classes = {
         "Block"     : [("StatementsList", "statements_")],
         "Expression": [("ExprPtr", "expression_")],
+        "Fn"        : [("Token", "name_"), ("TokensList", "tokens_"), ("StatementsList", "statements_")],
         "If"        : [("ExprPtr", "condition_"), ("StmtPtr", "then_"), ("StmtPtr", "else_br_")],
         "While"     : [("ExprPtr", "condition_"), ("StmtPtr", "body_")],
         "Var"       : [("Token", "name_"), ("ExprPtr", "initialiser_")],

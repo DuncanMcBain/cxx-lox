@@ -6,6 +6,7 @@
 #include "Utils.h"
 
 #include <absl/container/flat_hash_map.h>
+#include <absl/container/inlined_vector.h>
 
 #include <optional>
 
@@ -20,6 +21,8 @@ class Environment {
   void define(absl::string_view, ExprResult);
   std::optional<ExprResult> get(Token);
 };
+
+using EnvironmentStack = absl::InlinedVector<Environment, 8>;
 
 } // namespace lox
 

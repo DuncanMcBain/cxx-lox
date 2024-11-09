@@ -1,5 +1,6 @@
-#include "Interpreter.h"
 #include "Expr.h"
+#include "Function.hpp"
+#include "Interpreter.h"
 #include "Utils.h"
 
 #include <absl/base/macros.h>
@@ -10,24 +11,19 @@
 
 #include <cstddef>
 #include <memory>
-
-template <typename... Ts>
-struct Overloaded : public Ts... {
-  using Ts::operator()...;
-};
-template <typename... Ts>
-Overloaded(Ts...) -> Overloaded<Ts...>;
+#include <optional>
 
 namespace lox {
 
 ExprResult Interpreter::evaluate(ExprPtr expr) { return expr->accept(*this); }
 
 bool isEqual(ExprResult l, ExprResult r) {
-  auto visitor = Overloaded{[](bool a, bool b) { return a == b; },
-                            [](double a, double b) { return a == b; },
-                            [](std::string a, std::string b) { return a == b; },
-                            [](std::nullptr_t, std::nullptr_t) { return true; },
-                            [](auto, auto) { return false; }};
+  auto visitor = util::Overloaded(
+      [](bool a, bool b) { return a == b; },
+      [](double a, double b) { return a == b; },
+      [](std::string a, std::string b) { return a == b; },
+      [](std::nullptr_t, std::nullptr_t) { return true; },
+      [](auto, auto) { return false; });
   return std::visit(visitor, l, r);
 }
 
@@ -42,9 +38,12 @@ bool isTruthy(ExprResult obj) {
 
 ExprResult Interpreter::visitAssignExpr(Assign &a) {
   auto val = evaluate(a.val_);
-  for (auto &e : make_reverse(envs_)) {
-    if (e.assign(a.name_, val)) break;
+  for (auto &e : util::make_reverse(envs_)) {
+    if (e.assign(a.name_, val)) return val;
   }
+  auto resolved = global_.assign(a.name_, val);
+  ABSL_ASSERT(resolved &&
+      "Variable being assigned to not found in any environment");
   return val;
 }
 
@@ -63,7 +62,7 @@ ExprResult Interpreter::visitBinaryExpr(Binary &b) {
   case MINUS: return std::get<double>(left) - std::get<double>(right);
   case PLUS:
     return std::visit(
-        Overloaded{
+        util::Overloaded{
             [](double a, double b) -> ExprResult { return a + b; },
             [](std::string a, std::string b) -> ExprResult { return a + b; },
             [](auto, auto) -> ExprResult {
@@ -78,8 +77,27 @@ ExprResult Interpreter::visitBinaryExpr(Binary &b) {
   case LESS_EQ: return std::get<double>(left) <= std::get<double>(right);
   case BANG_EQ: return !isEqual(left, right);
   case EQ_EQ: return isEqual(left, right);
-  default: unreachable();
+  default: util::unreachable();
   }
+}
+
+ExprResult Interpreter::visitCallExpr(Call &expr) {
+  auto res = evaluate(expr.callee_);
+  Args args;
+  for (auto &arg : expr.args_) args.push_back(evaluate(arg));
+  auto evaluate_call_expr = [this, &args](CallablePtr &func) -> ExprResult {
+    if (args.size() != func->arity())
+      throw RuntimeError(
+          fmt::format("Expected {} arguments to function, got {}.",
+                      func->arity(), args.size()));
+    return (*func)(*this, std::move(args));
+  };
+  auto error_case = [](auto) -> ExprResult {
+    throw RuntimeError("Attempted to call expression that was not a function");
+    return {};
+  };
+
+  return std::visit(util::Overloaded{evaluate_call_expr, error_case}, res);
 }
 
 ExprResult Interpreter::visitLogicalExpr(Logical &l) {
@@ -102,24 +120,33 @@ ExprResult Interpreter::visitUnaryExpr(Unary &u) {
   switch (u.op_.type()) {
   case TokenType::MINUS: return -std::get<double>(right);
   case TokenType::BANG: return !isTruthy(right);
-  default: unreachable();
+  default:
+    util::unreachable();
+    // TODO: test this. Can it be reached?
   }
 }
 
 ExprResult Interpreter::visitVariableExpr(Variable &v) {
-  for (auto &e : make_reverse(envs_)) {
-    auto res = e.get(v.name_);
+  auto name = v.name_;
+  for (auto &e : util::make_reverse(envs_)) {
+    auto res = e.get(name);
     if (res) return *res;
   }
-  throw RuntimeError(
-      absl::StrCat("Undefined variable: ", v.name_.identifier()));
+  auto res = global_.get(name);
+  if (res) return *res;
+
+  throw RuntimeError(absl::StrCat("Undefined variable: ", name.identifier()));
 }
 
 void Interpreter::visitBlockStmt(Block &b) { executeBlock(b.statements_); }
 
-// TODO: remove the forced print when the print-as-function is implemented
 void Interpreter::visitExpressionStmt(Expression &e) {
-  fmt::print("{}\n", to_string(evaluate(e.expression_)));
+  evaluate(e.expression_);
+}
+
+void Interpreter::visitFnStmt(Fn &f) {
+  auto func = std::make_shared<Function>(f);
+  current().define(f.name_.lexeme(), func);
 }
 
 void Interpreter::visitIfStmt(If &i) {
@@ -131,8 +158,8 @@ void Interpreter::visitIfStmt(If &i) {
 }
 
 void Interpreter::visitVarStmt(Var &v) {
-  cur().define(v.name_.identifier(),
-               v.initialiser_ ? evaluate(v.initialiser_) : nullptr);
+  current().define(v.name_.identifier(),
+                   v.initialiser_ ? evaluate(v.initialiser_) : nullptr);
 }
 
 void Interpreter::visitWhileStmt(While &w) {
@@ -140,8 +167,14 @@ void Interpreter::visitWhileStmt(While &w) {
 }
 
 // TODO: fix the catch
-void Interpreter::executeBlock(StatementsList &stmts) {
-  envs_.emplace_back();
+void Interpreter::executeBlock(const StatementsList &stmts,
+                               std::optional<Environment> &&env) {
+  std::optional<EnvironmentStack> prior;
+  if (env) {
+    prior = std::move(envs_);
+    envs_ = EnvironmentStack{};
+  }
+  envs_.push_back(env.value_or(Environment{}));
   try {
     for (auto &stmt : stmts) {
       ABSL_ASSERT(stmt);
@@ -149,23 +182,13 @@ void Interpreter::executeBlock(StatementsList &stmts) {
     }
   } catch (...) { ; }
   envs_.pop_back();
+  if (prior) { envs_ = std::move(*prior); }
 }
 
 void Interpreter::interpret(StatementsList &&list) {
   try {
     for (auto const &stmt : list) { execute(*stmt); }
   } catch (RuntimeError const &e) { report_error(e.what(), Location{}); }
-}
-
-// TODO: move to Expr.h as inline function maybe? Needs to live somewhere
-// better than here
-std::string Interpreter::to_string(ExprResult res) {
-  auto visitor =
-      Overloaded{[](bool a) -> std::string { return a ? "true" : "false"; },
-                 [](double a) { return std::to_string(a); },
-                 [](std::string a) { return a; },
-                 [](std::nullptr_t) -> std::string { return "nil"; }};
-  return std::visit(visitor, res);
 }
 
 } // namespace lox

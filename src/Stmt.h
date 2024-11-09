@@ -28,6 +28,7 @@ struct Stmt {
 
 struct Block;
 struct Expression;
+struct Fn;
 struct If;
 struct While;
 struct Var;
@@ -38,6 +39,7 @@ template <typename T>
 struct Visitor {
   virtual T visitBlockStmt(Block &)           = 0;
   virtual T visitExpressionStmt(Expression &) = 0;
+  virtual T visitFnStmt(Fn &)                 = 0;
   virtual T visitIfStmt(If &)                 = 0;
   virtual T visitWhileStmt(While &)           = 0;
   virtual T visitVarStmt(Var &)               = 0;
@@ -48,6 +50,8 @@ struct Visitor {
 
 using StmtPtr        = std::shared_ptr<Stmt>;
 using StatementsList = absl::InlinedVector<std::shared_ptr<lox::Stmt>, 8>;
+
+using TokensList = absl::InlinedVector<Token, 8>;
 
 struct Block : Stmt {
   StatementsList statements_;
@@ -70,6 +74,20 @@ struct Expression : Stmt {
   }
   std::string accept(stmt::Visitor<std::string> &v) override {
     return v.visitExpressionStmt(*this);
+  }
+};
+
+struct Fn : Stmt {
+  Token name_;
+  TokensList tokens_;
+  StatementsList statements_;
+  Fn(Token name, TokensList tokens, StatementsList statements)
+      : name_(name)
+      , tokens_(tokens)
+      , statements_(statements) {}
+  void accept(stmt::Visitor<void> &v) override { return v.visitFnStmt(*this); }
+  std::string accept(stmt::Visitor<std::string> &v) override {
+    return v.visitFnStmt(*this);
   }
 };
 

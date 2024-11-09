@@ -1,6 +1,7 @@
 #ifndef LOX_INTERPRETER_H_
 #define LOX_INTERPRETER_H_
 
+#include "Builtins.hpp"
 #include "Environment.h"
 #include "Expr.h"
 #include "Stmt.h"
@@ -8,32 +9,29 @@
 #include <absl/container/inlined_vector.h>
 
 #include <memory>
+#include <optional>
 
 namespace lox {
 
 class Interpreter
     : public expr::Visitor<ExprResult>
     , stmt::Visitor<void> {
-  using EnvironmentStack = absl::InlinedVector<Environment, 8>;
-  EnvironmentStack envs_ = EnvironmentStack{{}};
+  Environment global_;
+  EnvironmentStack envs_;
 
-  Environment &cur() {
-    ABSL_ASSERT(envs_.size() > 0);
-    return *(envs_.end() - 1);
-  }
+  Environment &current() { return envs_.size() ? *(envs_.end() - 1) : global_; }
 
   ExprResult evaluate(ExprPtr);
   void execute(Stmt &stmt) { stmt.accept(*this); }
-  void executeBlock(StatementsList &);
-  std::string to_string(ExprResult);
 
   ExprResult visitBoolLiteralExpr(BoolLiteral &b) override { return b.value_; }
+  ExprResult visitNullLiteralExpr(NullLiteral &n) override { return nullptr; }
   ExprResult visitNumLiteralExpr(NumLiteral &l) override { return l.value_; }
   ExprResult visitStrLiteralExpr(StrLiteral &s) override { return s.value_; }
-  ExprResult visitNullLiteralExpr(NullLiteral &n) override { return nullptr; }
   ExprResult visitGroupExpr(Group &g) override { return evaluate(g.expr_); }
   ExprResult visitAssignExpr(Assign &) override;
   ExprResult visitBinaryExpr(Binary &) override;
+  ExprResult visitCallExpr(Call &) override;
   ExprResult visitLogicalExpr(Logical &) override;
   ExprResult visitTernaryExpr(Ternary &) override;
   ExprResult visitUnaryExpr(Unary &) override;
@@ -41,12 +39,20 @@ class Interpreter
 
   void visitBlockStmt(Block &) override;
   void visitExpressionStmt(Expression &) override;
+  void visitFnStmt(Fn &) override;
   void visitIfStmt(If &) override;
   void visitVarStmt(Var &) override;
   void visitWhileStmt(While &) override;
 
  public:
+  Interpreter() {
+    current().define("now", std::shared_ptr<Callable>(new Now{}));
+    current().define("print", std::shared_ptr<Callable>(new Print{}));
+  }
+
   void interpret(StatementsList &&);
+  void executeBlock(const StatementsList &,
+                    std::optional<Environment> && = std::nullopt);
 };
 
 } // namespace lox

@@ -15,11 +15,15 @@ namespace lox {
 using TokenTypeList = absl::InlinedVector<lox::TokenType, 4>;
 
 class Parser {
+  enum class FunctionKind { FUNC, METHOD };
+
   std::vector<Token> tokens_;
   int current_;
+  bool parsing_args_;
 
   ExprPtr and_expr();
   ExprPtr assignment();
+  ExprPtr call();
   ExprPtr comma();
   ExprPtr comparison();
   ExprPtr equality();
@@ -31,10 +35,11 @@ class Parser {
   ExprPtr ternary();
   ExprPtr unary();
 
-  StmtPtr declaration();
   StatementsList block();
+  StmtPtr declaration();
   StmtPtr exprstmt();
   StmtPtr for_stmt();
+  StmtPtr function(FunctionKind);
   StmtPtr statement();
   StmtPtr var_declaration();
   StmtPtr while_stmt();
@@ -62,7 +67,8 @@ class Parser {
  public:
   Parser(std::vector<Token> &&tokens)
       : tokens_(tokens)
-      , current_(0) {}
+      , current_(0)
+      , parsing_args_{false} {}
 
   StatementsList parse() {
     StatementsList statements;
