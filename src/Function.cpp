@@ -1,6 +1,6 @@
-#include "Environment.h"
+#include "Environment.hpp"
 #include "Function.hpp"
-#include "Interpreter.h"
+#include "Interpreter.hpp"
 
 namespace lox {
 

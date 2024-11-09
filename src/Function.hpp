@@ -2,8 +2,8 @@
 #define LOX_FUNCTION_HPP
 
 #include "Callable.hpp"
-#include "Expr.h"
-#include "Stmt.h"
+#include "Expr.hpp"
+#include "Stmt.hpp"
 
 #include <memory>
 

@@ -1,5 +1,5 @@
-#include "Scanner.h"
-#include "Error.h"
+#include "Scanner.hpp"
+#include "Error.hpp"
 
 #include <absl/base/macros.h>
 #include <absl/strings/ascii.h>
@@ -82,6 +82,7 @@ void Scanner::scan_token() {
   case '>': add_token(match('=') ? GTR_EQ : GTR); break;
   case '/':
     // case for comments running to eol
+    // TODO: slash-star style multiline comments?
     if (match('/')) {
       while (peek() != '\n' && !at_end()) { advance(); }
     } else {

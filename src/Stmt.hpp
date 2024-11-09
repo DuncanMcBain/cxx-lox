@@ -1,8 +1,8 @@
-#ifndef LOX_STMT_H_
-#define LOX_STMT_H_
+#ifndef LOX_STMT_HPP
+#define LOX_STMT_HPP
 
-#include "Expr.h"
-#include "Token.h"
+#include "Expr.hpp"
+#include "Token.hpp"
 
 #include <absl/container/inlined_vector.h>
 
@@ -132,4 +132,4 @@ struct Var : Stmt {
 };
 
 } // namespace lox
-#endif
+#endif // LOX_STMT_HPP

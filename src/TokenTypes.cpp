@@ -1,6 +1,6 @@
 #include <vector>
 
-#include "TokenTypes.h"
+#include "TokenTypes.hpp"
 
 namespace {
 #define X(NAME, _) #NAME,

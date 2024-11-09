@@ -1,8 +1,8 @@
-#ifndef LOX_SCANNER_H_
-#define LOX_SCANNER_H_
+#ifndef LOX_SCANNER_HPP
+#define LOX_SCANNER_HPP
 
-#include "KeywordNames.h"
-#include "Token.h"
+#include "KeywordNames.hpp"
+#include "Token.hpp"
 
 #include <absl/strings/string_view.h>
 
@@ -43,4 +43,4 @@ class Scanner {
 
 } // namespace lox
 
-#endif // LOX_SCANNER_H_
+#endif // LOX_SCANNER_HPP

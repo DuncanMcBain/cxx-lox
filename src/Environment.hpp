@@ -1,9 +1,9 @@
-#ifndef LOX_ENVIRONMENT_H_
-#define LOX_ENVIRONMENT_H_
+#ifndef LOX_ENVIRONMENT_HPP
+#define LOX_ENVIRONMENT_HPP
 
-#include "Expr.h"
-#include "Token.h"
-#include "Utils.h"
+#include "Expr.hpp"
+#include "Token.hpp"
+#include "Utils.hpp"
 
 #include <absl/container/flat_hash_map.h>
 #include <absl/container/inlined_vector.h>
@@ -26,4 +26,4 @@ using EnvironmentStack = absl::InlinedVector<Environment, 8>;
 
 } // namespace lox
 
-#endif // LOX_ENVIRONMENT_H_
+#endif // LOX_ENVIRONMENT_HPP

@@ -72,11 +72,11 @@ def defineVisitor(basename, types):
 def defineAST(dir, basename, types):
     lines = []
     return_type = 'void' if basename == 'Stmt' else 'ExprResult'
-    lines.append('#ifndef LOX_{0}_H_\n#define LOX_{0}_H_\n\n'.format(
+    lines.append('#ifndef LOX_{0}_HPP\n#define LOX_{0}_HPP\n\n'.format(
         basename.upper()))
     if not basename == "Expr":
-        lines.append('#include "Expr.h"\n')
-    lines.append('#include "Token.h"\n\n')
+        lines.append('#include "Expr.hpp"\n')
+    lines.append('#include "Token.hpp"\n\n')
     lines.append('#include <absl/container/inlined_vector.h>\n\n')
     lines.append('#include <cstddef>\n')
     lines.append('#include <memory>\n')
@@ -107,8 +107,8 @@ def defineAST(dir, basename, types):
         lines.append('using ExpressionsList = absl::InlinedVector<std::shared_ptr<lox::Expr>, 8>;\n\n')
     for typ in iter(types):
         lines.extend(defineType(basename, typ, types[typ]))
-    lines.append('}  // namespace lox\n#endif\n')
-    path = Path(dir) / (basename + ".h")
+    lines.append('}}  // namespace lox\n#endif  // LOX_{}_HPP\n'.format(basename.upper()))
+    path = Path(dir) / (basename + ".hpp")
     with open(path, 'w') as f:
         for line in lines:
             f.write(line)

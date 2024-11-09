@@ -1,10 +1,10 @@
-#ifndef LOX_INTERPRETER_H_
-#define LOX_INTERPRETER_H_
+#ifndef LOX_INTERPRETER_HPP
+#define LOX_INTERPRETER_HPP
 
 #include "Builtins.hpp"
-#include "Environment.h"
-#include "Expr.h"
-#include "Stmt.h"
+#include "Environment.hpp"
+#include "Expr.hpp"
+#include "Stmt.hpp"
 
 #include <absl/container/inlined_vector.h>
 
@@ -57,4 +57,4 @@ class Interpreter
 
 } // namespace lox
 
-#endif // LOX_INTERPRETER_H_
+#endif // LOX_INTERPRETER_HPP

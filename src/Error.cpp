@@ -2,7 +2,7 @@
 
 #include <fmt/format.h>
 
-#include "Error.h"
+#include "Error.hpp"
 
 namespace lox {
 

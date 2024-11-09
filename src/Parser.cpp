@@ -1,6 +1,6 @@
-#include "Parser.h"
-#include "Error.h"
-#include "Utils.h"
+#include "Parser.hpp"
+#include "Error.hpp"
+#include "Utils.hpp"
 
 #include <fmt/format.h>
 

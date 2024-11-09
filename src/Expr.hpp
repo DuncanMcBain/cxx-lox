@@ -1,7 +1,7 @@
-#ifndef LOX_EXPR_H_
-#define LOX_EXPR_H_
+#ifndef LOX_EXPR_HPP
+#define LOX_EXPR_HPP
 
-#include "Token.h"
+#include "Token.hpp"
 
 #include <absl/container/inlined_vector.h>
 
@@ -231,4 +231,4 @@ struct Unary : Expr {
 };
 
 } // namespace lox
-#endif
+#endif // LOX_EXPR_HPP

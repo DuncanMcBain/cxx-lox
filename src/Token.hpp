@@ -1,8 +1,8 @@
-#ifndef LOX_TOKEN_H_
-#define LOX_TOKEN_H_
+#ifndef LOX_TOKEN_HPP
+#define LOX_TOKEN_HPP
 
-#include "Error.h"
-#include "TokenTypes.h"
+#include "Error.hpp"
+#include "TokenTypes.hpp"
 
 #include <absl/strings/numbers.h>
 #include <absl/strings/str_cat.h>
@@ -66,4 +66,4 @@ class Token {
 
 } //  namespace lox
 
-#endif // LOX_TOKEN_H_
+#endif // LOX_TOKEN_HPP

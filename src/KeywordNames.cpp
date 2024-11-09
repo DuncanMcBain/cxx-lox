@@ -1,4 +1,4 @@
-#include "KeywordNames.h"
+#include "KeywordNames.hpp"
 
 #define X(TOKEN, token)                                                        \
   if (TOKEN == TokenType::AND) { modifying = true; }                           \

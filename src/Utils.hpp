@@ -1,5 +1,5 @@
-#ifndef LOX_UTILS_H_
-#define LOX_UTILS_H_
+#ifndef LOX_UTILS_HPP
+#define LOX_UTILS_HPP
 #include <absl/base/macros.h>
 
 namespace util {
@@ -64,4 +64,4 @@ inline std::string to_string(ExprResult res) {
 }
 
 } // namespace lox
-#endif // LOX_UTILS_H_
+#endif // LOX_UTILS_HPP

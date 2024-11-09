@@ -1,7 +1,7 @@
-#ifndef LOX_KEYWORDNAMES_H_
-#define LOX_KEYWORDNAMES_H_
+#ifndef LOX_KEYWORDNAMES_HPP
+#define LOX_KEYWORDNAMES_HPP
 
-#include "TokenTypes.h"
+#include "TokenTypes.hpp"
 
 #include <absl/strings/string_view.h>
 
@@ -13,4 +13,4 @@ const std::unordered_map<absl::string_view, TokenType> &get_keywords();
 
 } // namespace lox
 
-#endif // LOX_KEYWORDNAMES_H_
+#endif // LOX_KEYWORDNAMES_HPP

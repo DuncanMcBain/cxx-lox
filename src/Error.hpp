@@ -1,5 +1,5 @@
-#ifndef LOX_ERROR_H_
-#define LOX_ERROR_H_
+#ifndef LOX_ERROR_HPP
+#define LOX_ERROR_HPP
 
 #include <absl/strings/string_view.h>
 
@@ -65,4 +65,4 @@ class RuntimeError : public std::exception {
 
 } // namespace lox
 
-#endif // LOX_ERROR_H_
+#endif // LOX_ERROR_HPP

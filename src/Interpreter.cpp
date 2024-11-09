@@ -1,7 +1,7 @@
-#include "Expr.h"
+#include "Expr.hpp"
 #include "Function.hpp"
-#include "Interpreter.h"
-#include "Utils.h"
+#include "Interpreter.hpp"
+#include "Utils.hpp"
 
 #include <absl/base/macros.h>
 #include <absl/container/inlined_vector.h>

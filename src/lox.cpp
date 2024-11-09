@@ -1,7 +1,7 @@
-#include "Error.h"
-#include "Interpreter.h"
-#include "Parser.h"
-#include "Scanner.h"
+#include "Error.hpp"
+#include "Interpreter.hpp"
+#include "Parser.hpp"
+#include "Scanner.hpp"
 
 #include <absl/strings/string_view.h>
 

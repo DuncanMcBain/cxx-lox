@@ -1,5 +1,5 @@
-#ifndef LOX_TOKENTYPES_H_
-#define LOX_TOKENTYPES_H_
+#ifndef LOX_TOKENTYPES_HPP
+#define LOX_TOKENTYPES_HPP
 
 #include <string>
 
@@ -18,4 +18,4 @@ const std::string &to_string(TokenType);
 
 } // namespace lox
 
-#endif // LOX_TOKENTYPES_H_
+#endif // LOX_TOKENTYPES_HPP

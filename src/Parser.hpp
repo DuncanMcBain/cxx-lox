@@ -1,10 +1,10 @@
-#ifndef LOX_PARSER_H_
-#define LOX_PARSER_H_
+#ifndef LOX_PARSER_HPP
+#define LOX_PARSER_HPP
 
-#include "Expr.h"
-#include "Stmt.h"
-#include "Token.h"
-#include "Utils.h"
+#include "Expr.hpp"
+#include "Stmt.hpp"
+#include "Token.hpp"
+#include "Utils.hpp"
 
 #include <absl/container/inlined_vector.h>
 
@@ -82,4 +82,4 @@ class Parser {
 
 } // namespace lox
 
-#endif // LOX_PARSER_H_
+#endif // LOX_PARSER_HPP

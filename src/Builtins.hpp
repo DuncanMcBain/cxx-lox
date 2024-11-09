@@ -2,8 +2,8 @@
 #define LOX_BUILTINS_HPP
 
 #include "Callable.hpp"
-#include "Interpreter.h"
-#include "Utils.h"
+#include "Interpreter.hpp"
+#include "Utils.hpp"
 
 #include <fmt/format.h>
 
