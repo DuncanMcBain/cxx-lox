@@ -2,9 +2,10 @@ cxx_loxi = executable(
   'cxx-loxi',
   [
   'lox.cpp',
+  'Environment.cpp',
   'Error.cpp',
-  'Interpreter.cpp',
   'Function.cpp',
+  'Interpreter.cpp',
   'KeywordNames.cpp',
   'Parser.cpp',
   'Scanner.cpp',

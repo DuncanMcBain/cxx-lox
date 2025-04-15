@@ -1,6 +1,13 @@
 #ifndef LOX_UTILS_HPP
 #define LOX_UTILS_HPP
+
+#include "Callable.hpp"
+#include "Expr.hpp"
+
 #include <absl/base/macros.h>
+
+#include <cstddef>
+#include <string>
 
 namespace util {
 
@@ -51,15 +58,8 @@ inline std::string to_string(ExprResult res) {
       [](double a) { return std::to_string(a); },
       [](std::string a) { return a; },
       [](std::nullptr_t) -> std::string { return "nil"; },
-      [](auto a) -> std::string {
-        static_assert(
-            sizeof(a) || 1,
-            "Missing to_string implementation for ExprResult variant");
-        // It is strange that this is required to clear a warning. This
-        // function can clearly never really exist, and yet without it a
-        // warning we receive.
-        return std::string{};
-      }};
+      [](CallablePtr c) -> std::string { return c->to_string(); }
+      };
   return std::visit(visitor, res);
 }
 

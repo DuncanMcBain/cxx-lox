@@ -2,7 +2,6 @@
 #define LOX_BUILTINS_HPP
 
 #include "Callable.hpp"
-#include "Interpreter.hpp"
 #include "Utils.hpp"
 
 #include <fmt/format.h>
@@ -10,6 +9,8 @@
 #include <chrono>
 
 namespace lox {
+
+class Interpreter;
 
 class Now : public Callable {
  public:
