@@ -13,12 +13,14 @@ namespace lox {
 class Interpreter;
 
 class Now : public Callable {
+  const std::chrono::time_point<std::chrono::steady_clock> st_ =
+      std::chrono::steady_clock::now();
+
  public:
   ~Now() = default;
   // Doesn't need the interpreter, and has no args
-  ExprResult operator()(Interpreter&, Args&& = {}) override {
-    static auto st = std::chrono::steady_clock::now();
-    std::chrono::duration<double> ret = std::chrono::steady_clock::now() - st;
+  ExprResult operator()(Interpreter &, Args && = {}) override {
+    std::chrono::duration<double> ret = std::chrono::steady_clock::now() - st_;
     return ret.count();
   }
 
@@ -29,10 +31,8 @@ class Now : public Callable {
 class Print : public Callable {
  public:
   ~Print() = default;
-  ExprResult operator()(Interpreter&, Args&& args = {}) override {
-    for(const auto &e : args) {
-      fmt::print("{}\n", lox::to_string(e));
-    }
+  ExprResult operator()(Interpreter &, Args &&args = {}) override {
+    for (const auto &e : args) { fmt::print("{}\n", lox::to_string(e)); }
     return 1.0;
   }
 
